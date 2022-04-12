@@ -5,6 +5,9 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"html/template"
 	"log"
 	"os"
@@ -48,7 +51,6 @@ func main() {
 	displayVersion := flag.Bool("version", false, "Display version and exit")
 
 	flag.Parse()
-	fmt.Printf("%s\n", cfg.db.dsn)
 
 	if *displayVersion {
 		fmt.Printf("Version:\t%s\n", version)
@@ -102,6 +104,18 @@ func openDB(cfg config) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
+	if err != nil {
+		return nil, err
+	}
+
+	m.Up()
 
 	return db, nil
 }
