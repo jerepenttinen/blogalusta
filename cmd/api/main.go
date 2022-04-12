@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"flag"
 	"fmt"
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"html/template"
 	"log"
 	"os"
@@ -99,6 +101,21 @@ func openDB(cfg config) (*sql.DB, error) {
 	defer cancel()
 
 	err = db.PingContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
+	if err != nil {
+		return nil, err
+	}
+
+	err = m.Up()
 	if err != nil {
 		return nil, err
 	}
