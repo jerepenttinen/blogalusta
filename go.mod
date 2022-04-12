@@ -1,6 +1,7 @@
 module blogalusta
 
 // +heroku goVersion go1.18
+// +heroku install -tags 'postgres' ./vendor/github.com/golang-migrate/migrate/v4/cmd/migrate .
 go 1.18
 
 require (
