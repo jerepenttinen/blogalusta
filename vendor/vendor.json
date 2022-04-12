@@ -1,0 +1,8 @@
+{
+  "heroku": {
+    "install" : [
+      "./cmd/...",
+      "github.com/golang-migrate/migrate"
+    ],
+  }
+}
