@@ -8,8 +8,10 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golangcollege/sessions"
 	"html/template"
 	"log"
+	"net/http"
 	"os"
 	"time"
 
@@ -34,6 +36,7 @@ type config struct {
 
 type application struct {
 	config        config
+	session       *sessions.Session
 	templateCache map[string]*template.Template
 }
 
@@ -42,6 +45,7 @@ func main() {
 
 	flag.IntVar(&cfg.port, "port", getEnvInt("PORT", 4000), "API server port")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
+	secret := flag.String("secret", os.Getenv("SESSION_SECRET"), "Session secret key")
 
 	// Heroku free DB has max 20 connections
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 20, "PostgreSQL max open connections")
@@ -69,9 +73,15 @@ func main() {
 	}
 	defer db.Close()
 
+	session := sessions.New([]byte(*secret))
+	session.Lifetime = 12 * time.Hour
+	session.Secure = true
+	session.SameSite = http.SameSiteStrictMode
+
 	app := &application{
 		config:        cfg,
 		templateCache: templateCache,
+		session:       session,
 	}
 
 	log.Printf("starting server on port %d\n", app.config.port)
