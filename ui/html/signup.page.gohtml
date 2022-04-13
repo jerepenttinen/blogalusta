@@ -1,0 +1,27 @@
+{{template "base" .}}
+
+{{define "title"}}Signup{{end}}
+
+{{define "body"}}
+    <h1>Signup</h1>
+    <form action='/user/signup' method='post'>
+        {{template "csrf" .}}
+        {{with .Form}}
+            <div>
+                <label for='name-input'>Name:</label>
+                <input type='text' name='name' id='name-input' value='{{.Get "name"}}'>
+            </div>
+            <div>
+                <label for='email-input'>Email:</label>
+                <input type='email' name='email' id='email-input' value='{{.Get "email"}}'>
+            </div>
+            <div>
+                <label for='password-input'>Password:</label>
+                <input type='password' name='password' id='password-input' value='{{.Get "password"}}'>
+            </div>
+            <div>
+                <input type='submit' value='Signup'>
+            </div>
+        {{end}}
+    </form>
+{{end}}

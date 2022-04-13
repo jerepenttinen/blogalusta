@@ -35,6 +35,8 @@ type config struct {
 }
 
 type application struct {
+	errorLog      *log.Logger
+	infoLog       *log.Logger
 	config        config
 	session       *sessions.Session
 	templateCache map[string]*template.Template
@@ -62,6 +64,9 @@ func main() {
 		os.Exit(0)
 	}
 
+	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
+	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
+
 	templateCache, err := newTemplateCache("./ui/html")
 	if err != nil {
 		log.Fatal(err)
@@ -69,7 +74,7 @@ func main() {
 
 	db, err := openDB(cfg)
 	if err != nil {
-		log.Fatal(err)
+		errorLog.Fatal(err)
 	}
 	defer db.Close()
 
@@ -80,14 +85,16 @@ func main() {
 
 	app := &application{
 		config:        cfg,
+		infoLog:       infoLog,
+		errorLog:      errorLog,
 		templateCache: templateCache,
 		session:       session,
 	}
 
-	log.Printf("starting server on port %d\n", app.config.port)
+	infoLog.Printf("starting server on port %d\n", app.config.port)
 	err = app.serve()
 	if err != nil {
-		log.Fatal(err)
+		errorLog.Fatal(err)
 	}
 }
 

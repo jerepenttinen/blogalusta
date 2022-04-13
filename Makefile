@@ -16,6 +16,10 @@ confirm:
 run/api:
 	go run ./cmd/api
 
+.PHONY: run/heroku
+run/heroku:
+	heroku local
+
 ## db/psql: connect to the database using psql
 .PHONY: db/psql
 db/psql:
