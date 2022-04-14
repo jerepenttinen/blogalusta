@@ -4,13 +4,9 @@ CREATE TABLE IF NOT EXISTS publication
     name        varchar(24)                 NOT NULL,
     url         varchar(24)                 NOT NULL UNIQUE,
     description text                        NOT NULL,
-    owner_id    int                         NOT NULL,
+    owner_id    int                         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     created_at  timestamp(0) with time zone NOT NULL DEFAULT now(),
-    version     int                         NOT NULL DEFAULT 1,
-    CONSTRAINT fk_owner
-        FOREIGN KEY (owner_id)
-            REFERENCES users (id)
-            ON DELETE CASCADE
+    version     int                         NOT NULL DEFAULT 1
 );
 
 CREATE TABLE IF NOT EXISTS writes_on
