@@ -1,0 +1,10 @@
+{{template "base" .}}
+
+{{define "title"}}{{.Publication.Name}}{{end}}
+
+{{define "body"}}
+    {{with .Publication}}
+        <h1>{{.Name}}</h1>
+        <pre>{{.Description}}</pre>
+    {{end}}
+{{end}}

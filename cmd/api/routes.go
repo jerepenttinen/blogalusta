@@ -23,5 +23,11 @@ func (app *application) routes() *chi.Mux {
 		r.Post("/logout", app.handleLogout)
 	})
 
+	r.Route("/{publicationSlug:[a-z-]+}", func(r chi.Router) {
+		r.Use(dynamic...)
+		r.Get("/", app.handleShowPublicationPage)
+		r.Get("/{articleSlug:[a-z0-9-]+}", app.handleShowArticlePage)
+	})
+
 	return r
 }

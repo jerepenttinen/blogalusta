@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS publication
 (
     id          bigserial PRIMARY KEY,
-    name        varchar(32)                 NOT NULL,
-    url         varchar(16)                 NOT NULL UNIQUE,
+    name        varchar(24)                 NOT NULL,
+    url         varchar(24)                 NOT NULL UNIQUE,
     description text                        NOT NULL,
     owner_id    int                         NOT NULL,
     created_at  timestamp(0) with time zone NOT NULL DEFAULT now(),
