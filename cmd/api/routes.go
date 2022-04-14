@@ -20,6 +20,7 @@ func (app *application) routes() *chi.Mux {
 		r.Post("/signup", app.handleSignup)
 		r.Get("/login", app.handleShowLoginPage)
 		r.Post("/login", app.handleLogin)
+		r.Post("/logout", app.handleLogout)
 	})
 
 	return r

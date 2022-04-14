@@ -79,3 +79,15 @@ func (app *application) handleLogin(w http.ResponseWriter, r *http.Request) {
 	app.session.Put(r, "userID", id)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+func (app *application) handleLogout(w http.ResponseWriter, r *http.Request) {
+	exists := app.session.Exists(r, "userID")
+	if !exists {
+		app.clientError(w, http.StatusUnauthorized)
+		return
+	}
+
+	app.session.Remove(r, "userID")
+	app.session.Put(r, "flash", "You've been logged out")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
