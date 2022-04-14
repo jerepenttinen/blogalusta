@@ -1,1 +1,1 @@
-DROP TABLE IF EXISTS artictle;
+DROP TABLE IF EXISTS article;
