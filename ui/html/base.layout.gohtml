@@ -17,6 +17,9 @@
             <a href='/'>Home</a>
         </div>
         <div>
+            {{if .CanCreatePublication}}
+                <a href='/user/publication'>Create publication</a>
+            {{end}}
             {{if .AuthenticatedUser}}
                 <form action='/user/logout' method='post'>
                     {{template "csrf" .}}
@@ -26,7 +29,6 @@
                 <a href='/user/signup'>Signup</a>
                 <a href='/user/login'>Login</a>
             {{end}}
-
         </div>
     </nav>
     <section>

@@ -91,3 +91,13 @@ func (app *application) handleLogout(w http.ResponseWriter, r *http.Request) {
 	app.session.Put(r, "flash", "You've been logged out")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
+
+func (app *application) handleShowCreatePublicationPage(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "create_publication.page.gohtml", &templateData{
+		Form: forms.New(nil),
+	})
+}
+
+func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.Request) {
+
+}

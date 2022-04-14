@@ -21,6 +21,8 @@ func (app *application) routes() *chi.Mux {
 		r.Get("/login", app.handleShowLoginPage)
 		r.Post("/login", app.handleLogin)
 		r.Post("/logout", app.handleLogout)
+		r.Get("/publication", app.handleShowCreatePublicationPage)
+		r.Post("/publication", app.handleCreatePublication)
 	})
 
 	r.Route("/{publicationSlug:[a-z-]+}", func(r chi.Router) {
