@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blogalusta/internal/data"
 	"context"
 	"database/sql"
 	"flag"
@@ -23,6 +24,10 @@ var (
 	version   string
 )
 
+type contextKey string
+
+var contextKeyUser = contextKey("user")
+
 type config struct {
 	port int
 
@@ -38,6 +43,7 @@ type application struct {
 	errorLog      *log.Logger
 	infoLog       *log.Logger
 	config        config
+	models        data.Models
 	session       *sessions.Session
 	templateCache map[string]*template.Template
 }
@@ -87,6 +93,7 @@ func main() {
 		config:        cfg,
 		infoLog:       infoLog,
 		errorLog:      errorLog,
+		models:        data.NewModels(db),
 		templateCache: templateCache,
 		session:       session,
 	}

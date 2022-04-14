@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blogalusta/internal/data"
 	"blogalusta/internal/forms"
 	"html/template"
 	"path/filepath"
@@ -8,9 +9,10 @@ import (
 )
 
 type templateData struct {
-	CSRFToken   string
-	CurrentYear int
-	Form        *forms.Form
+	AuthenticatedUser *data.User
+	CSRFToken         string
+	CurrentYear       int
+	Form              *forms.Form
 }
 
 func humanDate(t time.Time) string {

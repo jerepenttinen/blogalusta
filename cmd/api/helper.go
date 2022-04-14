@@ -1,10 +1,13 @@
 package main
 
 import (
+	"blogalusta/internal/data"
 	"bytes"
 	"fmt"
+	"github.com/justinas/nosurf"
 	"net/http"
 	"os"
+	"runtime/debug"
 	"strconv"
 	"time"
 )
@@ -19,8 +22,8 @@ func getEnvInt(key string, fallback int) int {
 }
 
 func (app *application) serverError(w http.ResponseWriter, err error) {
-	// trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
-	// app.errorLog.Output(2, trace)
+	trace := fmt.Sprintf("%s\n%s", err.Error(), debug.Stack())
+	app.errorLog.Output(2, trace)
 
 	http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 }
@@ -37,8 +40,9 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	if td == nil {
 		td = &templateData{}
 	}
-	// td.CSRFToken = nosurf.Token(r)
+	td.CSRFToken = nosurf.Token(r)
 	td.CurrentYear = time.Now().Year()
+	td.AuthenticatedUser = app.authenticatedUser(r)
 	return td
 }
 
@@ -58,4 +62,12 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, name stri
 	}
 
 	buf.WriteTo(w)
+}
+
+func (app *application) authenticatedUser(r *http.Request) *data.User {
+	user, ok := r.Context().Value(contextKeyUser).(*data.User)
+	if !ok {
+		return nil
+	}
+	return user
 }
