@@ -1,27 +1,75 @@
 package main
 
 import (
-	"blogalusta/internal/data"
+	"blogalusta/internal/forms"
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"strconv"
 )
 
 func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http.Request) {
-	publicationSlug := chi.URLParam(r, "publicationSlug")
-	publication, err := app.models.Publications.GetBySlug(publicationSlug)
-	if err == data.ErrRecordNotFound {
-		app.clientError(w, http.StatusNotFound)
-		return
-	} else if err != nil {
+	isWriter, err := app.models.Publications.UserIsWriter(app.authenticatedUser(r), app.publication(r))
+	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
 	app.render(w, r, "publication.page.gohtml", &templateData{
-		Publication: publication,
+		IsWriter: isWriter,
 	})
 }
 
 func (app *application) handleShowArticlePage(w http.ResponseWriter, r *http.Request) {
+	url, id, err := app.getArticleSlugAndId(chi.URLParam(r, "articleSlug"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+	w.Write([]byte("article: " + url + " id: " + strconv.Itoa(id)))
+}
 
+func (app *application) handleShowCreateArticlePage(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "create_article.page.gohtml", &templateData{
+		Form: forms.New(nil),
+	})
+}
+
+func (app *application) handleCreateArticle(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+	publication := app.publication(r)
+
+	isWriter, err := app.models.Publications.UserIsWriter(user, publication)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	if !isWriter {
+		app.clientError(w, http.StatusUnauthorized)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	form.Required("content", "title")
+
+	if !form.Valid() {
+		app.render(w, r, "create_article.page.gohtml", &templateData{
+			Form: form,
+		})
+		return
+	}
+
+	article, err := app.models.Articles.Publish(user, publication, form.Get("title"), form.Get("content"))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	http.Redirect(w, r, "/"+publication.URL+"/"+article.URL, http.StatusSeeOther)
 }

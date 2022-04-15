@@ -15,6 +15,7 @@ type templateData struct {
 	Form              *forms.Form
 	Publication       *data.Publication
 	Publications      *data.Publications
+	IsWriter          bool
 }
 
 func humanDate(t time.Time) string {

@@ -5,7 +5,7 @@
 {{define "body"}}
     <h1>Login</h1>
     <form action='/user/login' method='post'>
-        {{template "csrf" .}}
+        <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
         {{with .Form}}
             {{with .Errors.Get "generic"}}
                 <div class='error'>{{.}}</div>

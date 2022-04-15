@@ -3,6 +3,9 @@
 {{define "title"}}{{.Publication.Name}}{{end}}
 
 {{define "body"}}
+    {{if .IsWriter}}
+        <a href='/{{$.Publication.URL}}/article'>New article</a>
+    {{end}}
     {{with .Publication}}
         <h1>{{.Name}}</h1>
         <pre>{{.Description}}</pre>

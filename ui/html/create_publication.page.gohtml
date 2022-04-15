@@ -5,14 +5,14 @@
 {{define "body"}}
     <h1>Create publication</h1>
     <form action='/user/publication/create' method='post'>
-        {{template "csrf" .}}
+        <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
         {{with .Form}}
             <div>
                 <label for='name-input'>Name:</label>
                 {{with .Errors.Get "name"}}
                     <label class='error'>{{.}}</label>
                 {{end}}
-                <input type='text' name='name' id='name-input' value='{{.Get "name"}}' pattern="[A-Za-z0-9 -']+" required oninput='updateSlug()'>
+                <input type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' maxlength='24' required>
             </div>
             <div>
                 <label for='description-input'>Description:</label>

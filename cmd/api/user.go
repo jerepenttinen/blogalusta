@@ -114,7 +114,7 @@ func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.R
 	user := app.authenticatedUser(r)
 	url, err := app.models.Publications.Insert(user.ID, form.Get("name"), form.Get("description"))
 	if err == data.ErrDuplicateUrl {
-		form.Errors.Add("name", "Name already in use")
+		form.Errors.Add("name", "Title already in use")
 		app.render(w, r, "create_publication.page.gohtml", &templateData{Form: form})
 		return
 	} else if err != nil {

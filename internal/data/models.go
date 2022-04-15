@@ -13,11 +13,13 @@ var (
 type Models struct {
 	Users        UserModel
 	Publications PublicationModel
+	Articles     ArticleModel
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
 		Users:        UserModel{DB: db},
 		Publications: PublicationModel{DB: db},
+		Articles:     ArticleModel{DB: db},
 	}
 }

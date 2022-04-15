@@ -20,7 +20,7 @@
             {{if .AuthenticatedUser}}
                 <a href='/user/publication'>My publications</a>
                 <form action='/user/logout' method='post'>
-                    {{template "csrf" .}}
+                    <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
                     <button>Logout ({{.AuthenticatedUser.Name}})</button>
                 </form>
             {{else}}

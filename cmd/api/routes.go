@@ -13,6 +13,7 @@ func (app *application) routes() *chi.Mux {
 	dynamic := []func(http.Handler) http.Handler{app.session.Enable, noSurf, app.authenticate}
 
 	r.With(dynamic...).Get("/", app.handleShowHomePage)
+	r.With(dynamic...).With(app.requireAuthenticatedUser).Post("/render", app.handleRender)
 
 	r.Route("/user", func(r chi.Router) {
 		r.Use(dynamic...)
@@ -28,9 +29,12 @@ func (app *application) routes() *chi.Mux {
 	})
 
 	r.Route("/{publicationSlug:[a-z-]+}", func(r chi.Router) {
+		r.Use(app.addPublicationToContext)
 		r.Use(dynamic...)
 		r.Get("/", app.handleShowPublicationPage)
-		r.Get("/{articleSlug:[a-z0-9-]+}", app.handleShowArticlePage)
+		r.With(app.requireAuthenticatedUser).Get("/article", app.handleShowCreateArticlePage)
+		r.With(app.requireAuthenticatedUser).Post("/article", app.handleCreateArticle)
+		r.Get("/{articleSlug:[a-z0-9-]+-[0-9]+}", app.handleShowArticlePage)
 	})
 
 	return r

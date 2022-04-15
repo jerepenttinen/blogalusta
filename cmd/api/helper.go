@@ -3,12 +3,14 @@ package main
 import (
 	"blogalusta/internal/data"
 	"bytes"
+	"errors"
 	"fmt"
 	"github.com/justinas/nosurf"
 	"net/http"
 	"os"
 	"runtime/debug"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -43,6 +45,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.CSRFToken = nosurf.Token(r)
 	td.CurrentYear = time.Now().Year()
 	td.AuthenticatedUser = app.authenticatedUser(r)
+	td.Publication = app.publication(r)
 	return td
 }
 
@@ -70,4 +73,24 @@ func (app *application) authenticatedUser(r *http.Request) *data.User {
 		return nil
 	}
 	return user
+}
+
+func (app *application) publication(r *http.Request) *data.Publication {
+	publication, ok := r.Context().Value(contextKeyPublication).(*data.Publication)
+	if !ok {
+		return nil
+	}
+	return publication
+}
+
+func (app *application) getArticleSlugAndId(url string) (string, int, error) {
+	i := strings.LastIndex(url, "-")
+	if i == -1 {
+		return "", 0, errors.New("invalid article url")
+	}
+
+	slug := url[:i]
+	id, _ := strconv.Atoi(url[i+1:])
+
+	return slug, id, nil
 }

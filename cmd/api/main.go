@@ -10,6 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golangcollege/sessions"
+	"github.com/microcosm-cc/bluemonday"
 	"html/template"
 	"log"
 	"net/http"
@@ -26,7 +27,10 @@ var (
 
 type contextKey string
 
-var contextKeyUser = contextKey("user")
+var (
+	contextKeyUser        = contextKey("user")
+	contextKeyPublication = contextKey("publication")
+)
 
 type config struct {
 	port int
@@ -46,6 +50,7 @@ type application struct {
 	models        data.Models
 	session       *sessions.Session
 	templateCache map[string]*template.Template
+	policy        *bluemonday.Policy
 }
 
 func main() {
@@ -96,6 +101,7 @@ func main() {
 		models:        data.NewModels(db),
 		templateCache: templateCache,
 		session:       session,
+		policy:        bluemonday.UGCPolicy(),
 	}
 
 	infoLog.Printf("starting server on port %d\n", app.config.port)
