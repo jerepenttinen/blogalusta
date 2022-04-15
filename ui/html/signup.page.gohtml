@@ -9,14 +9,23 @@
         {{with .Form}}
             <div>
                 <label for='name-input'>Name:</label>
+                {{with .Errors.Get "name"}}
+                    <label class='error'>{{.}}</label>
+                {{end}}
                 <input type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' required>
             </div>
             <div>
                 <label for='email-input'>Email:</label>
+                {{with .Errors.Get "email"}}
+                    <label class='error'>{{.}}</label>
+                {{end}}
                 <input type='email' name='email' id='email-input' value='{{.Get "email"}}' required>
             </div>
             <div>
                 <label for='password-input'>Password:</label>
+                {{with .Errors.Get "password"}}
+                    <label class='error'>{{.}}</label>
+                {{end}}
                 <input type='password' name='password' id='password-input' value='{{.Get "password"}}' minlength='10' maxlength='72' required>
             </div>
             <div>

@@ -9,14 +9,16 @@
         {{with .Form}}
             <div>
                 <label for='name-input'>Name:</label>
+                {{with .Errors.Get "name"}}
+                    <label class='error'>{{.}}</label>
+                {{end}}
                 <input type='text' name='name' id='name-input' value='{{.Get "name"}}' pattern="[A-Za-z0-9 -']+" required oninput='updateSlug()'>
-                <div>
-                    <span>URL slug: </span>
-                    <span id='slug'></span>
-                </div>
             </div>
             <div>
                 <label for='description-input'>Description:</label>
+                {{with .Errors.Get "description"}}
+                    <label class='error'>{{.}}</label>
+                {{end}}
                 <textarea name='description' id='description-input' cols='30' rows='10' required>{{.Get "description"}}</textarea>
             </div>
             <div>
@@ -24,15 +26,4 @@
             </div>
         {{end}}
     </form>
-    <script>
-        const slug = document.getElementById('slug');
-        const input = document.getElementById('name-input')
-        function updateSlug() {
-            slug.innerText = input.value.toLowerCase()
-                .trim()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w\-]+/g, '')
-        }
-        updateSlug();
-    </script>
 {{end}}

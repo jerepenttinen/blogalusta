@@ -7,6 +7,9 @@
     <form action='/user/login' method='post'>
         {{template "csrf" .}}
         {{with .Form}}
+            {{with .Errors.Get "generic"}}
+                <div class='error'>{{.}}</div>
+            {{end}}
             <div>
                 <label for='email-input'>Email:</label>
                 <input type='email' name='email' id='email-input' value='{{.Get "email"}}' required>
