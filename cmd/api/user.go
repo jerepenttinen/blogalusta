@@ -110,7 +110,14 @@ func (app *application) handleShowMyPublicationsPage(w http.ResponseWriter, r *h
 	}
 
 	userID := app.session.Get(r, "userID").(int)
-	publications, err := app.models.Publications.GetUsersPublications(userID)
+	user, err := app.models.Users.Get(userID)
+	if err != nil {
+		app.clientError(w, http.StatusUnauthorized)
+		app.session.Remove(r, "userID")
+		return
+	}
+
+	publications, err := app.models.Publications.GetUsersPublications(user.ID)
 	if err != nil {
 		app.serverError(w, err)
 		return

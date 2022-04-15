@@ -48,7 +48,7 @@ func (m *PublicationModel) GetBySlug(slug string) (*Publication, error) {
 	return p, nil
 }
 
-func (m *PublicationModel) GetUsersPublications(userID int) (*Publications, error) {
+func (m *PublicationModel) GetUsersPublications(userID int64) (*Publications, error) {
 	ps := &Publications{}
 
 	qt := []struct {
