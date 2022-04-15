@@ -17,10 +17,8 @@
             <a href='/'>Home</a>
         </div>
         <div>
-            {{if .CanCreatePublication}}
-                <a href='/user/publication'>Create publication</a>
-            {{end}}
             {{if .AuthenticatedUser}}
+                <a href='/user/publication'>My publications</a>
                 <form action='/user/logout' method='post'>
                     {{template "csrf" .}}
                     <button>Logout ({{.AuthenticatedUser.Name}})</button>

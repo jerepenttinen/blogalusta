@@ -101,3 +101,22 @@ func (app *application) handleShowCreatePublicationPage(w http.ResponseWriter, r
 func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.Request) {
 
 }
+
+func (app *application) handleShowMyPublicationsPage(w http.ResponseWriter, r *http.Request) {
+	exists := app.session.Exists(r, "userID")
+	if !exists {
+		app.clientError(w, http.StatusUnauthorized)
+		return
+	}
+
+	userID := app.session.Get(r, "userID").(int)
+	publications, err := app.models.Publications.GetUsersPublications(userID)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "my_publications.page.gohtml", &templateData{
+		Publications: publications,
+	})
+}

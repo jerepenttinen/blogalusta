@@ -4,14 +4,14 @@
 
 {{define "body"}}
     <h1>Create publication</h1>
-    <form action='/user/publication' method='post'>
+    <form action='/user/publication/create' method='post'>
         {{template "csrf" .}}
         {{with .Form}}
             <div>
                 <label for='name-input'>Name:</label>
                 <input type='text' name='name' id='name-input' value='{{.Get "name"}}' pattern="[A-Za-z0-9 -']+" required oninput='updateSlug()'>
                 <div>
-                    <span>Your slug is: </span>
+                    <span>URL slug: </span>
                     <span id='slug'></span>
                 </div>
             </div>
