@@ -103,8 +103,9 @@ func (app *application) getArticleSlugAndId(url string) (string, int, error) {
 }
 
 func (app *application) markdownToHTML(md string) []byte {
-	unsafeHTML := markdown.ToHTML([]byte(md), nil, nil)
-	return app.policy.SanitizeBytes(unsafeHTML)
+	normalized := markdown.NormalizeNewlines([]byte(md))
+	unsafeHTML := markdown.ToHTML(normalized, nil, app.markdown.renderer)
+	return app.markdown.policy.SanitizeBytes(unsafeHTML)
 }
 
 func (app *application) article(r *http.Request) *data.Article {

@@ -10,6 +10,7 @@ import (
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/golangcollege/sessions"
+	"github.com/gomarkdown/markdown/html"
 	"github.com/microcosm-cc/bluemonday"
 	"html/template"
 	"log"
@@ -51,7 +52,10 @@ type application struct {
 	models        data.Models
 	session       *sessions.Session
 	templateCache map[string]*template.Template
-	policy        *bluemonday.Policy
+	markdown      struct {
+		policy   *bluemonday.Policy
+		renderer *html.Renderer
+	}
 }
 
 func main() {
@@ -95,6 +99,11 @@ func main() {
 	session.Secure = true
 	session.SameSite = http.SameSiteStrictMode
 
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+
+	renderer := html.NewRenderer(opts)
+
 	app := &application{
 		config:        cfg,
 		infoLog:       infoLog,
@@ -102,7 +111,13 @@ func main() {
 		models:        data.NewModels(db),
 		templateCache: templateCache,
 		session:       session,
-		policy:        bluemonday.UGCPolicy(),
+		markdown: struct {
+			policy   *bluemonday.Policy
+			renderer *html.Renderer
+		}{
+			policy:   bluemonday.UGCPolicy(),
+			renderer: renderer,
+		},
 	}
 
 	infoLog.Printf("starting server on port %d\n", app.config.port)
