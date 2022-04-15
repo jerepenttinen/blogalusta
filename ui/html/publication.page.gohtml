@@ -10,4 +10,14 @@
         <h1>{{.Name}}</h1>
         <pre>{{.Description}}</pre>
     {{end}}
+    <ul>
+        {{range .Articles}}
+            <li>
+                <section>
+                    <a href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
+                    <p>{{.CreatedAt}} {{.Writer.Name}}</p>
+                </section>
+            </li>
+        {{end}}
+    </ul>
 {{end}}

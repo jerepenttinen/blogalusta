@@ -12,8 +12,23 @@ func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http
 		return
 	}
 
+	articles, err := app.models.Articles.GetArticlesOfPublication(app.publication(r))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	for i := range articles {
+		articles[i].Writer, err = app.models.Users.Get(int(articles[i].WriterID))
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+	}
+
 	app.render(w, r, "publication.page.gohtml", &templateData{
 		IsWriter: isWriter,
+		Articles: articles,
 	})
 }
 

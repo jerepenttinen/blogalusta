@@ -17,6 +17,7 @@ type templateData struct {
 	Publications      *data.Publications
 	IsWriter          bool
 	Article           *data.Article
+	Articles          []*data.Article
 	HTML              template.HTML
 }
 

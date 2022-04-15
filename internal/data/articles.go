@@ -14,6 +14,7 @@ type Article struct {
 	Content       string
 	PublicationID int64
 	WriterID      int64
+	Writer        *User
 	URL           string
 	CreatedAt     time.Time
 	Version       int
@@ -54,9 +55,9 @@ func (m *ArticleModel) Publish(writer *User, publication *Publication, title, co
 
 func (m *ArticleModel) Get(articleID int) (*Article, error) {
 	query := `
-		SELECT id, title, content, publication_id, writer_id, created_at, version
-		FROM article
-		WHERE id = $1`
+		SELECT a.id, a.title, a.content, a.publication_id, a.writer_id, a.created_at, a.version
+		FROM article a
+		WHERE a.id = $1`
 
 	a := &Article{}
 
@@ -73,4 +74,34 @@ func (m *ArticleModel) Get(articleID int) (*Article, error) {
 	a.SetURL()
 
 	return a, nil
+}
+
+func (m *ArticleModel) GetArticlesOfPublication(publication *Publication) ([]*Article, error) {
+	query := `
+		SELECT id, title, content, publication_id, writer_id, created_at, version
+		FROM article
+		WHERE publication_id = $1
+		ORDER BY created_at DESC`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var articles []*Article
+
+	rows, err := m.DB.QueryContext(ctx, query, publication.ID)
+	for rows.Next() {
+		a := &Article{}
+		err = rows.Scan(&a.ID, &a.Title, &a.Content, &a.PublicationID, &a.WriterID, &a.CreatedAt, &a.Version)
+		if err != nil {
+			return nil, err
+		}
+		a.SetURL()
+		articles = append(articles, a)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return articles, nil
 }

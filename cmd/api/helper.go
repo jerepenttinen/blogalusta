@@ -51,6 +51,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.Article = app.article(r)
 	if td.Article != nil {
 		td.HTML = template.HTML(app.markdownToHTML(td.Article.Content))
+		td.Article.Writer, _ = app.models.Users.Get(int(td.Article.WriterID))
 	}
 	return td
 }
