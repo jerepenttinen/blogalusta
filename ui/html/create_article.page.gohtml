@@ -31,7 +31,7 @@
                             {{with .Errors.Get "title"}}
                                 <label class='error'>{{.}}</label>
                             {{end}}
-                            <input type='text' name='title' id='title-input' value='{{.Get "title"}}'>
+                            <input type='text' name='title' id='title-input' value='{{.Get "title"}}' onkeyup='syncTitle()'>
                         </div>
                         <div>
                             <label for='content-input'>Content:</label><br>
@@ -56,12 +56,7 @@
             </div>
             <article class='container'>
                 <h1 id='title'></h1>
-                <div id='render'
-                     hx-post='/render'
-                     hx-trigger='load'
-                     hx-target='#render'
-                     hx-include='#form'
-                ></div>
+                <div id='render'></div>
             </article>
         </div>
     {{end}}

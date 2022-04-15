@@ -2,9 +2,7 @@ package main
 
 import (
 	"blogalusta/internal/forms"
-	"github.com/go-chi/chi/v5"
 	"net/http"
-	"strconv"
 )
 
 func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http.Request) {
@@ -20,12 +18,7 @@ func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http
 }
 
 func (app *application) handleShowArticlePage(w http.ResponseWriter, r *http.Request) {
-	url, id, err := app.getArticleSlugAndId(chi.URLParam(r, "articleSlug"))
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-	w.Write([]byte("article: " + url + " id: " + strconv.Itoa(id)))
+	app.render(w, r, "article.page.gohtml", nil)
 }
 
 func (app *application) handleShowCreateArticlePage(w http.ResponseWriter, r *http.Request) {

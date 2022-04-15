@@ -16,6 +16,8 @@ type templateData struct {
 	Publication       *data.Publication
 	Publications      *data.Publications
 	IsWriter          bool
+	Article           *data.Article
+	HTML              template.HTML
 }
 
 func humanDate(t time.Time) string {

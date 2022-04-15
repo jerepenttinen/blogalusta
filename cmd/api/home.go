@@ -2,8 +2,6 @@ package main
 
 import (
 	"blogalusta/internal/forms"
-	"github.com/gomarkdown/markdown"
-	"github.com/gomarkdown/markdown/html"
 	"net/http"
 )
 
@@ -25,13 +23,6 @@ func (app *application) handleRender(w http.ResponseWriter, r *http.Request) {
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
-	htmlFlags := html.CommonFlags | html.HrefTargetBlank
-	opts := html.RendererOptions{
-		Flags: htmlFlags,
-		Title: form.Get("title"),
-	}
-	renderer := html.NewRenderer(opts)
 
-	unsafeHTML := markdown.ToHTML([]byte(form.Get("content")), nil, renderer)
-	w.Write(app.policy.SanitizeBytes(unsafeHTML))
+	w.Write(app.markdownToHTML(form.Get("content")))
 }

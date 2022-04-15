@@ -34,7 +34,7 @@ func (app *application) routes() *chi.Mux {
 		r.Get("/", app.handleShowPublicationPage)
 		r.With(app.requireAuthenticatedUser).Get("/article", app.handleShowCreateArticlePage)
 		r.With(app.requireAuthenticatedUser).Post("/article", app.handleCreateArticle)
-		r.Get("/{articleSlug:[a-z0-9-]+-[0-9]+}", app.handleShowArticlePage)
+		r.With(app.addArticleToContext).Get("/{articleSlug:[a-z0-9-]+-[0-9]+}", app.handleShowArticlePage)
 	})
 
 	return r

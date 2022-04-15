@@ -103,3 +103,30 @@ func (app *application) addPublicationToContext(next http.Handler) http.Handler 
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+func (app *application) addArticleToContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		url, id, err := app.getArticleSlugAndId(chi.URLParam(r, "articleSlug"))
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		article, err := app.models.Articles.Get(id)
+		if err == data.ErrRecordNotFound {
+			app.clientError(w, http.StatusNotFound)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		if !article.Matches(url) {
+			app.clientError(w, http.StatusNotFound)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextKeyArticle, article)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}

@@ -5,7 +5,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/gomarkdown/markdown"
 	"github.com/justinas/nosurf"
+	"html/template"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -46,6 +48,10 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.CurrentYear = time.Now().Year()
 	td.AuthenticatedUser = app.authenticatedUser(r)
 	td.Publication = app.publication(r)
+	td.Article = app.article(r)
+	if td.Article != nil {
+		td.HTML = template.HTML(app.markdownToHTML(td.Article.Content))
+	}
 	return td
 }
 
@@ -93,4 +99,17 @@ func (app *application) getArticleSlugAndId(url string) (string, int, error) {
 	id, _ := strconv.Atoi(url[i+1:])
 
 	return slug, id, nil
+}
+
+func (app *application) markdownToHTML(md string) []byte {
+	unsafeHTML := markdown.ToHTML([]byte(md), nil, nil)
+	return app.policy.SanitizeBytes(unsafeHTML)
+}
+
+func (app *application) article(r *http.Request) *data.Article {
+	article, ok := r.Context().Value(contextKeyArticle).(*data.Article)
+	if !ok {
+		return nil
+	}
+	return article
 }

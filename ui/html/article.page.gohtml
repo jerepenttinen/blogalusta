@@ -1,0 +1,32 @@
+{{template "base" .}}
+
+{{define "title"}}Create article{{end}}
+
+{{define "body"}}
+    <style>
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        @media screen and (min-width: 768px) {
+            .container {
+                margin: 0 auto;
+                width: 730px;
+            }
+        }
+
+        textarea {
+            width: 100%;
+            resize: vertical;
+        }
+    </style>
+    <div class='tabs'>
+        {{with .Article}}
+            <article class='container'>
+                <h1>{{.Title}}</h1>
+                {{$.HTML}}
+            </article>
+        {{end}}
+    </div>
+{{end}}
