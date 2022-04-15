@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS publication
 (
     id          bigserial PRIMARY KEY,
-    name        varchar(24)                 NOT NULL,
-    url         varchar(24)                 NOT NULL UNIQUE,
+    name        text                        NOT NULL,
+    url         text                        NOT NULL UNIQUE,
     description text                        NOT NULL,
     owner_id    int                         NOT NULL REFERENCES users (id) ON DELETE CASCADE,
     created_at  timestamp(0) with time zone NOT NULL DEFAULT now(),

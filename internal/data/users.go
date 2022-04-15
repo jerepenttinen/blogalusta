@@ -34,8 +34,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 
 	query := `
 		INSERT INTO users (name, email, password_hash)
-		VALUES ($1, $2, $3)
-		RETURNING id, created_at, version`
+		VALUES ($1, $2, $3)`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()

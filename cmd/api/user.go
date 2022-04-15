@@ -94,7 +94,36 @@ func (app *application) handleShowCreatePublicationPage(w http.ResponseWriter, r
 }
 
 func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
 
+	form := forms.New(r.PostForm)
+	form.Required("name", "description")
+	form.MaxLength("name", 24)
+	form.MinLength("name", 4)
+	form.RestrictedValues("name", "user")
+
+	if !form.Valid() {
+		app.render(w, r, "create_publication.page.gohtml", &templateData{Form: form})
+		return
+	}
+
+	user := app.authenticatedUser(r)
+	url, err := app.models.Publications.Insert(user.ID, form.Get("name"), form.Get("description"))
+	if err == data.ErrDuplicateUrl {
+		form.Add("name", "Name already in use")
+		app.render(w, r, "create_publication.page.gohtml", &templateData{Form: form})
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.session.Put(r, "flash", "Created a new publication")
+	http.Redirect(w, r, "/"+url, http.StatusSeeOther)
 }
 
 func (app *application) handleShowMyPublicationsPage(w http.ResponseWriter, r *http.Request) {

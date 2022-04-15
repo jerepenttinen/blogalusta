@@ -65,6 +65,16 @@ func (f *Form) PermittedValues(field string, opts ...string) {
 	f.Errors.Add(field, "This field is invalid")
 }
 
+func (f *Form) RestrictedValues(field string, opts ...string) {
+	value := f.Get(field)
+	for _, opt := range opts {
+		if value == opt {
+			f.Errors.Add(field, "This field is invalid")
+			return
+		}
+	}
+}
+
 func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 	value := f.Get(field)
 	if value == "" {

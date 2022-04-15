@@ -4,6 +4,27 @@
 
 {{define "body"}}
     <h1>My publications</h1>
+    {{if .Publications.Owns}}
+        <table>
+            <tr>
+                <th>Owns</th>
+                <th></th>
+            </tr>
+
+            {{range .Publications.Owns}}
+                <tr>
+                    <td><a href='/{{.URL}}'>{{.Name}}</a></td>
+                    <td>
+                        <form action='/user/publication/delete' method='post'>
+                            <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
+                            <input type='hidden' name='publication-id' value='{{.ID}}'>
+                            <button type='submit'>Delete</button>
+                        </form>
+                    </td>
+                </tr>
+            {{end}}
+        </table>
+    {{end}}
     {{if .Publications.SubscribesTo}}
         <table>
             <tr>
@@ -27,28 +48,6 @@
             {{range .Publications.WritesOn}}
                 <tr>
                     <td><a href='/{{.URL}}'>{{.Name}}</a></td>
-                </tr>
-            {{end}}
-        </table>
-    {{end}}
-
-    {{if .Publications.Owns}}
-        <table>
-            <tr>
-                <th>Owns</th>
-                <th></th>
-            </tr>
-
-            {{range .Publications.Owns}}
-                <tr>
-                    <td><a href='/{{.URL}}'>{{.Name}}</a></td>
-                    <td>
-                        <form action='/user/publication/delete' method='post'>
-                            <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
-                            <input type='hidden' name='publication-id' value='{{.ID}}'>
-                            <button type='submit'>Delete</button>
-                        </form>
-                    </td>
                 </tr>
             {{end}}
         </table>

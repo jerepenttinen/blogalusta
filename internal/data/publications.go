@@ -3,7 +3,13 @@ package data
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"github.com/gosimple/slug"
 	"time"
+)
+
+var (
+	ErrDuplicateUrl = errors.New("duplicate url")
 )
 
 type Publication struct {
@@ -150,4 +156,27 @@ func (m *PublicationModel) DeleteByID(userID, publicationID int64) error {
 	}
 
 	return nil
+}
+
+func (m *PublicationModel) Insert(userID int64, name, description string) (string, error) {
+	query := `
+		INSERT INTO publication (name, url, description, owner_id)
+		VALUES ($1, $2, $3, $4)`
+
+	url := slug.Make(name)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, name, url, description, userID)
+	if err != nil {
+		switch {
+		case err.Error() == `pq: duplicate key value violates unique constraint "publication_url_key"`:
+			return "", ErrDuplicateUrl
+		default:
+			return "", err
+		}
+	}
+
+	return url, nil
 }
