@@ -5,6 +5,7 @@ import (
 	"blogalusta/internal/forms"
 	"net/http"
 	"net/mail"
+	"strconv"
 )
 
 func (app *application) handleShowSignupPage(w http.ResponseWriter, r *http.Request) {
@@ -81,12 +82,6 @@ func (app *application) handleLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) handleLogout(w http.ResponseWriter, r *http.Request) {
-	exists := app.session.Exists(r, "userID")
-	if !exists {
-		app.clientError(w, http.StatusUnauthorized)
-		return
-	}
-
 	app.session.Remove(r, "userID")
 	app.session.Put(r, "flash", "You've been logged out")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -103,19 +98,7 @@ func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.R
 }
 
 func (app *application) handleShowMyPublicationsPage(w http.ResponseWriter, r *http.Request) {
-	exists := app.session.Exists(r, "userID")
-	if !exists {
-		app.clientError(w, http.StatusUnauthorized)
-		return
-	}
-
-	userID := app.session.Get(r, "userID").(int)
-	user, err := app.models.Users.Get(userID)
-	if err != nil {
-		app.clientError(w, http.StatusUnauthorized)
-		app.session.Remove(r, "userID")
-		return
-	}
+	user := app.authenticatedUser(r)
 
 	publications, err := app.models.Publications.GetUsersPublications(user.ID)
 	if err != nil {
@@ -126,4 +109,29 @@ func (app *application) handleShowMyPublicationsPage(w http.ResponseWriter, r *h
 	app.render(w, r, "my_publications.page.gohtml", &templateData{
 		Publications: publications,
 	})
+}
+
+func (app *application) handleDeletePublication(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	user := app.authenticatedUser(r)
+	publicationID, err := strconv.Atoi(form.Get("publication-id"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = app.models.Publications.DeleteByID(user.ID, int64(publicationID))
+	if err != nil {
+		app.clientError(w, http.StatusMethodNotAllowed)
+		return
+	}
+
+	app.session.Put(r, "flash", "Deleted a publication")
+	http.Redirect(w, r, "/user/publication", http.StatusSeeOther)
 }

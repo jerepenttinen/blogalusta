@@ -20,10 +20,11 @@ func (app *application) routes() *chi.Mux {
 		r.Post("/signup", app.handleSignup)
 		r.Get("/login", app.handleShowLoginPage)
 		r.Post("/login", app.handleLogin)
-		r.Post("/logout", app.handleLogout)
-		r.Get("/publication/create", app.handleShowCreatePublicationPage)
-		r.Post("/publication/create", app.handleCreatePublication)
-		r.Get("/publication", app.handleShowMyPublicationsPage)
+		r.With(app.requireAuthenticatedUser).Post("/logout", app.handleLogout)
+		r.With(app.requireAuthenticatedUser).Get("/publication/create", app.handleShowCreatePublicationPage)
+		r.With(app.requireAuthenticatedUser).Post("/publication/create", app.handleCreatePublication)
+		r.With(app.requireAuthenticatedUser).Get("/publication", app.handleShowMyPublicationsPage)
+		r.With(app.requireAuthenticatedUser).Post("/publication/delete", app.handleDeletePublication)
 	})
 
 	r.Route("/{publicationSlug:[a-z-]+}", func(r chi.Router) {

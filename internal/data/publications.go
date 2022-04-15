@@ -133,3 +133,21 @@ func (m *PublicationModel) GetUsersPublications(userID int64) (*Publications, er
 
 	return ps, nil
 }
+
+func (m *PublicationModel) DeleteByID(userID, publicationID int64) error {
+	query := `
+		DELETE
+		FROM publication p
+		WHERE p.owner_id = $1 AND p.id = $2;`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, userID, publicationID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
