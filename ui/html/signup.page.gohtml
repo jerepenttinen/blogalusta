@@ -5,7 +5,7 @@
 {{define "body"}}
     <h4>Signup</h4>
     <form action='/user/signup' method='post'>
-        <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
+        {{template "csrf" $}}
         {{with .Form}}
             <div class='input-group-lg mb-4'>
                 {{with .Errors.Get "name"}}

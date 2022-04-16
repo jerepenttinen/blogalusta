@@ -5,7 +5,7 @@
 {{define "body"}}
     <h3 class='h3'>Create publication</h3>
     <form action='/user/publication/create' method='post'>
-        <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
+        {{template "csrf" $}}
         {{with .Form}}
             <div class='input-group mb-4'>
                 {{with .Errors.Get "name"}}

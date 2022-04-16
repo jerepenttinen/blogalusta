@@ -40,7 +40,7 @@
                                 </li>
                                 <li>
                                     <form action='/user/logout' method='post'>
-                                        <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
+                                        {{template "csrf" $}}
                                         <button type='submit' class='dropdown-item'>Logout</button>
                                     </form>
                                 </li>

@@ -21,7 +21,7 @@
                             <p class='card-text text-truncate'>{{.Description}}</p>
                             {{if eq .OwnerID $.AuthenticatedUser.ID}}
                                 <form action='/user/publication/delete' method='post'>
-                                    <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
+                                    {{template "csrf" $}}
                                     <input type='hidden' name='publication-id' value='{{.ID}}'>
                                     <button class='btn btn-danger btn-sm' type='submit'>Delete</button>
                                 </form>
