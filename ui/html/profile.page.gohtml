@@ -37,10 +37,10 @@
         <div class='mb-1'>
             <b>Subscribes</b>
         </div>
-        <div class='container mb-3'>
-            <div class='row gap-3'>
+        <div class='container-fluid'>
+            <div class='row row-cols-3'>
                 {{range .}}
-                    <content class='col card'>
+                    <content class='col card mb-3'>
                         <div class='card-body'>
                             <a href='/{{.URL}}' class='card-title stretched-link'>
                                 <b class='text-body text-truncate'>{{.Name}}</b>

@@ -15,9 +15,25 @@
             </a>
         </li>
     </ul>
-    {{range .Publication}}
+    {{with .Publication}}
         <section class='m-4'>
             {{.Description}}
         </section>
     {{end}}
+    <div class='container mb-3'>
+        <div class='row gap-3'>
+            {{range .Writers}}
+                <content class='col card'>
+                    <div class='card-body'>
+                        <a href='{{userURL .}}' class='card-title stretched-link'>
+                            <b class='text-body text-truncate'>{{.Name}}</b>
+                        </a>
+                        {{if eq .ID $.Publication.OwnerID}}
+                            <span class='badge rounded-pill bg-primary'>Owner</span>
+                        {{end}}
+                    </div>
+                </content>
+            {{end}}
+        </div>
+    </div>
 {{end}}

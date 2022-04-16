@@ -85,7 +85,12 @@ func (m *UserModel) Get(id int) (*User, error) {
 	s := &User{}
 
 	stmt := `SELECT id, name, email, created_at FROM users WHERE id = $1`
-	err := m.DB.QueryRow(stmt, id).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, stmt, id).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt)
+
 	if err == sql.ErrNoRows {
 		return nil, ErrRecordNotFound
 	} else if err != nil {
@@ -93,4 +98,35 @@ func (m *UserModel) Get(id int) (*User, error) {
 	}
 
 	return s, nil
+}
+
+func (m *UserModel) GetWritersOfPublication(publication *Publication) ([]*User, error) {
+
+	stmt := `
+		SELECT id, name, email, created_at
+		FROM writes_on
+		JOIN users on id = writes_on.user_id
+		WHERE publication_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var users []*User
+	rows, err := m.DB.QueryContext(ctx, stmt, publication.ID)
+	for rows.Next() {
+		u := &User{}
+		err = rows.Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	if err == sql.ErrNoRows {
+		return nil, ErrRecordNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

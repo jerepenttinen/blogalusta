@@ -6,12 +6,6 @@ import (
 )
 
 func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http.Request) {
-	isWriter, err := app.models.Publications.UserIsWriter(app.authenticatedUser(r), app.publication(r))
-	if err != nil {
-		app.serverError(w, err)
-		return
-	}
-
 	articles, err := app.models.Articles.GetArticlesOfPublication(app.publication(r))
 	if err != nil {
 		app.serverError(w, err)
@@ -27,7 +21,6 @@ func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http
 	}
 
 	app.render(w, r, "publication.page.gohtml", &templateData{
-		IsWriter: isWriter,
 		Articles: articles,
 	})
 }
@@ -80,4 +73,16 @@ func (app *application) handleCreateArticle(w http.ResponseWriter, r *http.Reque
 	}
 
 	http.Redirect(w, r, "/"+publication.URL+"/"+article.URL, http.StatusSeeOther)
+}
+
+func (app *application) handleShowPublicationAboutPage(w http.ResponseWriter, r *http.Request) {
+	writers, err := app.models.Users.GetWritersOfPublication(app.publication(r))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "publication_about.page.gohtml", &templateData{
+		Writers: writers,
+	})
 }

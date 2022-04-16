@@ -37,6 +37,7 @@ func (app *application) routes() *chi.Mux {
 		r.Use(app.addPublicationToContext)
 		r.Use(dynamic...)
 		r.Get("/", app.handleShowPublicationPage)
+		r.Get("/about", app.handleShowPublicationAboutPage)
 		r.With(app.addArticleToContext).Get("/{articleSlug:[a-z0-9-]+-[0-9]+}", app.handleShowArticlePage)
 		r.Route("/", func(r chi.Router) {
 			r.Use(app.requireAuthenticatedUser)

@@ -18,6 +18,7 @@ type templateData struct {
 	Publication       *data.Publication
 	Publications      *data.Publications
 	IsWriter          bool
+	Writers           []*data.User
 	Article           *data.Article
 	Articles          []*data.Article
 	HTML              template.HTML
@@ -41,6 +42,8 @@ func humanDate(t time.Time) string {
 		return "Just now"
 	} else if diff.Minutes() < 60 {
 		return fmt.Sprintf("%d mins ago", int(diff.Minutes()))
+	} else if diff.Hours() < 2 {
+		return fmt.Sprintf("%d hour ago", int(diff.Hours()))
 	} else if diff.Hours() < 24 {
 		return fmt.Sprintf("%d hours ago", int(diff.Hours()))
 	} else {
