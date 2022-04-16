@@ -27,7 +27,7 @@ func (app *application) routes() *chi.Mux {
 			r.Post("/logout", app.handleLogout)
 			r.Get("/publication/create", app.handleShowCreatePublicationPage)
 			r.Post("/publication/create", app.handleCreatePublication)
-			r.Get("/publication", app.handleShowMyPublicationsPage)
+			r.Get("/profile", app.handleShowMyProfilePage)
 			r.Post("/publication/delete", app.handleDeletePublication)
 			r.Get("/article", app.handleShowChoosePublicationPage)
 		})

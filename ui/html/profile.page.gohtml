@@ -1,0 +1,49 @@
+{{template "base" .}}
+
+{{define "title"}}{{.AuthenticatedUser.Name}}{{end}}
+
+{{define "body"}}
+    <h3 class='text-body'>My publications</h3>
+
+    {{with .Publications.WritesOn}}
+        <b>Writes</b>
+        <div class='container mb-3'>
+            <div class='row row-cols-1'>
+                {{range .}}
+                    <section class='card border-0'>
+                        <div class='card-body'>
+                            <a href='/{{.URL}}'
+                               class='card-title fw-bold text-body text-truncate mr-auto stretched-link'>
+                                {{.Name}}
+                            </a>
+                            <p class='card-text text-truncate'>{{.Description}}</p>
+                            {{if eq .OwnerID $.AuthenticatedUser.ID}}
+                                <form action='/user/publication/delete' method='post'>
+                                    <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
+                                    <input type='hidden' name='publication-id' value='{{.ID}}'>
+                                    <button class='btn btn-danger btn-sm' type='submit'>Delete</button>
+                                </form>
+                            {{end}}
+                        </div>
+                    </section>
+                {{end}}
+            </div>
+        </div>
+    {{end}}
+
+    {{with .Publications.SubscribesTo}}
+        <b>Subscribes</b>
+        <div class='container mb-3'>
+            <div class='row row-cols-3'>
+                {{range .}}
+                    <a href='/{{.URL}}' class='pb-3 pt-3'>
+                        <div class='col'>
+                            <b class='text-body text-truncate'>{{.Name}}</b>
+                        </div>
+                    </a>
+                {{end}}
+            </div>
+        </div>
+    {{end}}
+    <p><a href='/user/publication/create'>Create a new publication</a></p>
+{{end}}

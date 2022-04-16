@@ -126,7 +126,7 @@ func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.R
 	http.Redirect(w, r, "/"+url, http.StatusSeeOther)
 }
 
-func (app *application) handleShowMyPublicationsPage(w http.ResponseWriter, r *http.Request) {
+func (app *application) handleShowMyProfilePage(w http.ResponseWriter, r *http.Request) {
 	user := app.authenticatedUser(r)
 
 	publications, err := app.models.Publications.GetUsersPublications(user.ID)
@@ -135,7 +135,7 @@ func (app *application) handleShowMyPublicationsPage(w http.ResponseWriter, r *h
 		return
 	}
 
-	app.render(w, r, "my_publications.page.gohtml", &templateData{
+	app.render(w, r, "profile.page.gohtml", &templateData{
 		Publications: publications,
 	})
 }

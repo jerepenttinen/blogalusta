@@ -15,16 +15,20 @@
             </a>
         </li>
     </ul>
-    {{range .Articles}}
-        <section class='m-4'>
-            <a class='fw-bold' href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
-            <div class='d-inline fs-6'>
-                {{.Writer.Name}}
-                &nbsp;
-                <div title='{{rfc3339 .CreatedAt}}' class='d-inline'>
-                    <time datetime='{{rfc3339 .CreatedAt}}'>{{humanDate .CreatedAt}}</time>
+    {{if .Articles}}
+        {{range .Articles}}
+            <section class='card mb-4 border-0'>
+                <a class='fw-bold stretched-link' href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
+                <div class='d-inline fs-6'>
+                    {{.Writer.Name}}
+                    &nbsp;
+                    <div title='{{rfc3339 .CreatedAt}}' class='d-inline'>
+                        <time datetime='{{rfc3339 .CreatedAt}}'>{{humanDate .CreatedAt}}</time>
+                    </div>
                 </div>
-            </div>
-        </section>
+            </section>
+        {{end}}
+    {{else}}
+        <h1>Coming soon</h1>
     {{end}}
 {{end}}

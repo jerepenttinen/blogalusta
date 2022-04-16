@@ -3,27 +3,23 @@
 {{define "title"}}Create publication{{end}}
 
 {{define "body"}}
-    <h1>Create publication</h1>
+    <h3 class='h3'>Create publication</h3>
     <form action='/user/publication/create' method='post'>
         <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
         {{with .Form}}
-            <div>
-                <label for='name-input'>Name:</label>
+            <div class='input-group mb-4'>
                 {{with .Errors.Get "name"}}
                     <label class='error'>{{.}}</label>
                 {{end}}
-                <input type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' maxlength='24' required>
+                <input class='form-control' placeholder='Name' type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' maxlength='24' required>
             </div>
-            <div>
-                <label for='description-input'>Description:</label>
+            <div class='input-group mb-4'>
                 {{with .Errors.Get "description"}}
                     <label class='error'>{{.}}</label>
                 {{end}}
-                <textarea name='description' id='description-input' cols='30' rows='10' required>{{.Get "description"}}</textarea>
+                <textarea class='form-control' placeholder='Description' name='description' id='description-input' cols='30' rows='10' required>{{.Get "description"}}</textarea>
             </div>
-            <div>
-                <input type='submit' value='Create'>
-            </div>
+            <input type='submit' value='Create' class='mb-4 btn btn-primary'>
         {{end}}
     </form>
 {{end}}
