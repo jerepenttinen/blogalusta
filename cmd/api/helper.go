@@ -7,7 +7,9 @@ import (
 	"fmt"
 	"github.com/gomarkdown/markdown"
 	"github.com/justinas/nosurf"
+	"golang.org/x/image/draw"
 	"html/template"
+	"image"
 	"net/http"
 	"os"
 	"runtime/debug"
@@ -123,4 +125,41 @@ func (app *application) profileUser(r *http.Request) *data.User {
 		return nil
 	}
 	return user
+}
+
+func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {
+	type subImager interface {
+		SubImage(r image.Rectangle) image.Image
+	}
+
+	simg, ok := img.(subImager)
+	if !ok {
+		return nil, errors.New("image dose not support cropping")
+	}
+
+	return simg.SubImage(crop), nil
+}
+
+func cropCenterResize(img image.Image, sideLength int) (image.Image, error) {
+	rect := img.Bounds()
+
+	if rect.Max.X < rect.Max.Y {
+		y0 := (rect.Dy() - rect.Dx()) / 2
+		y1 := rect.Dx() + y0
+
+		rect = image.Rect(rect.Min.X, y0, rect.Max.X, y1)
+	} else if rect.Max.X > rect.Max.Y {
+		x0 := (rect.Dx() - rect.Dy()) / 2
+		x1 := rect.Dy() + x0
+
+		rect = image.Rect(x0, rect.Min.Y, x1, rect.Max.Y)
+	}
+	img, err := cropImage(img, rect)
+	if err != nil {
+		return nil, err
+	}
+	dst := image.NewRGBA(image.Rect(0, 0, sideLength, sideLength))
+	draw.BiLinear.Scale(dst, dst.Rect, img, img.Bounds(), draw.Over, nil)
+
+	return dst, nil
 }

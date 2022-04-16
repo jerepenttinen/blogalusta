@@ -1,0 +1,17 @@
+{{template "base" .}}
+
+{{define "title"}}User settings{{end}}
+
+{{define "body"}}
+    <p>Settings</p>
+    {{.AuthenticatedUser.Name}}
+    {{.AuthenticatedUser.Email}}
+    <img class='rounded-circle' src='{{userPic .AuthenticatedUser}}' alt='Profile pic' width='128'>
+
+    <form action='/user/image' method='post' enctype='multipart/form-data'>
+        {{template "csrf" $}}
+        <label for='image-input'>Profile picture</label>
+        <input type='file' accept='image/png, image/jpeg' class='form-control mb-3' name='image' id='image-input'>
+        <button type='submit' class='btn btn-primary'>Upload</button>
+    </form>
+{{end}}

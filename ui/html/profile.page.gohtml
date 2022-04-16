@@ -4,6 +4,7 @@
 
 {{define "body"}}
     <h3 class='text-body'>{{.ProfileUser.Name}}</h3>
+    <img class='rounded-circle' src='{{userPic .ProfileUser}}' alt='Profile pic' width='128'>
 
     {{with .Publications.WritesOn}}
         <div class='mb-1'>
@@ -20,10 +21,15 @@
                             </a>
                             <p class='card-text text-truncate'>{{.Description}}</p>
                             {{if eq .OwnerID $.AuthenticatedUser.ID}}
-                                <form action='/user/publication/delete' method='post'>
+                                <iframe name='hiddenFrame' width='0' height='0' style='display: none'></iframe>
+                                <form action='/user/publication/delete' method='post' target='hiddenFrame'
+                                      onsubmit='setTimeout(() => { window.location.reload() }, 50)'>
                                     {{template "csrf" $}}
                                     <input type='hidden' name='publication-id' value='{{.ID}}'>
-                                    <button class='btn btn-danger btn-sm' type='submit'>Delete</button>
+                                    <div class='position-relative d-inline-block'>
+                                        <button class='btn btn-danger btn-sm stretched-link' type='submit'>Delete
+                                        </button>
+                                    </div>
                                 </form>
                             {{end}}
                         </div>
@@ -51,5 +57,7 @@
             </div>
         </div>
     {{end}}
-    <p><a href='/user/publication/create'>Create a new publication</a></p>
+    {{if eq .AuthenticatedUser.ID .ProfileUser.ID}}
+        <p><a href='/user/publication/create'>Create a new publication</a></p>
+    {{end}}
 {{end}}

@@ -16,6 +16,9 @@ func (app *application) routes() *chi.Mux {
 	r.With(dynamic...).Get("/", app.handleShowHomePage)
 	r.With(dynamic...).With(app.requireAuthenticatedUser).Post("/render", app.handleRender)
 
+	r.Get("/img/{imageID:[0-9]+}.jpg", app.handleGetImage)
+	r.Get("/img/0.jpg", app.handleGetDefaultImage)
+
 	r.Route("/user", func(r chi.Router) {
 		r.Use(dynamic...)
 		r.Get("/signup", app.handleShowSignupPage)
@@ -29,6 +32,8 @@ func (app *application) routes() *chi.Mux {
 			r.Post("/publication/create", app.handleCreatePublication)
 			r.Post("/publication/delete", app.handleDeletePublication)
 			r.Get("/article", app.handleShowChoosePublicationPage)
+			r.Get("/settings", app.handleShowUserSettingsPage)
+			r.Post("/image", app.handleChangeUserProfilePicture)
 			r.With(app.addProfileToContext).Get("/{profileSlug:[a-z0-9-]+-[0-9]+}", app.handleShowProfilePage)
 		})
 	})

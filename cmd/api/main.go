@@ -44,6 +44,11 @@ type config struct {
 		maxIdleConns int
 		maxIdleTime  string
 	}
+
+	avatar struct {
+		maxSize    int
+		sideLength int
+	}
 }
 
 type application struct {
@@ -70,6 +75,9 @@ func main() {
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 20, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 20, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
+
+	flag.IntVar(&cfg.avatar.maxSize, "avatar-max-size", 1024*1024, "Avatar max size")
+	flag.IntVar(&cfg.avatar.sideLength, "avatar-side-length", 256, "Avatar size length")
 
 	displayVersion := flag.Bool("version", false, "Display version and exit")
 

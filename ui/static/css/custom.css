@@ -2,3 +2,22 @@
     filter: brightness(92%);
     transition: all 10ms ease;
 }
+
+.container-md {
+    max-width: 768px;
+}
+
+footer {
+    height: 70px;
+    text-align: center;
+}
+
+a:link {
+    text-decoration: none;
+}
+
+.dropdown-toggle-remove:after {
+    content: none;
+    vertical-align: 0;
+    margin-left: 0;
+}

@@ -22,9 +22,12 @@
     {{end}}
     <div class='container mb-3'>
         <div class='row gap-3'>
+            <b>Writers</b>
             {{range .Writers}}
                 <content class='col card'>
                     <div class='card-body'>
+                        <img class='rounded-circle me-4' src='{{userPic .}}'
+                             alt='Profile pic' width='92'>
                         <a href='{{userURL .}}' class='card-title stretched-link'>
                             <b class='text-body text-truncate'>{{.Name}}</b>
                         </a>

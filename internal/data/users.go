@@ -21,6 +21,7 @@ type User struct {
 	HashedPassword []byte
 	CreatedAt      time.Time
 	Version        int
+	ImageID        sql.NullInt64
 }
 
 func (u *User) Matches(url string) bool {
@@ -84,12 +85,12 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 func (m *UserModel) Get(id int) (*User, error) {
 	s := &User{}
 
-	stmt := `SELECT id, name, email, created_at FROM users WHERE id = $1`
+	stmt := `SELECT id, name, email, created_at, image_id FROM users WHERE id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := m.DB.QueryRowContext(ctx, stmt, id).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt)
+	err := m.DB.QueryRowContext(ctx, stmt, id).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt, &s.ImageID)
 
 	if err == sql.ErrNoRows {
 		return nil, ErrRecordNotFound
@@ -103,7 +104,7 @@ func (m *UserModel) Get(id int) (*User, error) {
 func (m *UserModel) GetWritersOfPublication(publication *Publication) ([]*User, error) {
 
 	stmt := `
-		SELECT id, name, email, created_at
+		SELECT id, name, email, created_at, image_id
 		FROM writes_on
 		JOIN users on id = writes_on.user_id
 		WHERE publication_id = $1`
@@ -115,7 +116,7 @@ func (m *UserModel) GetWritersOfPublication(publication *Publication) ([]*User, 
 	rows, err := m.DB.QueryContext(ctx, stmt, publication.ID)
 	for rows.Next() {
 		u := &User{}
-		err = rows.Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt)
+		err = rows.Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt, &u.ImageID)
 		if err != nil {
 			return nil, err
 		}
@@ -129,4 +130,21 @@ func (m *UserModel) GetWritersOfPublication(publication *Publication) ([]*User, 
 	}
 
 	return users, nil
+}
+
+func (m *UserModel) ChangeProfilePicture(user *User, id int) error {
+	query := `
+		UPDATE users
+		SET image_id = $1
+		WHERE id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, id, user.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

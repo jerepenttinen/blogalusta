@@ -59,10 +59,18 @@ func userURL(user *data.User) string {
 	return fmt.Sprintf("/user/%s-%d", slug.Make(user.Name), user.ID)
 }
 
+func userPic(user *data.User) string {
+	if !user.ImageID.Valid {
+		return fmt.Sprintf("/img/%d.jpg", 0)
+	}
+	return fmt.Sprintf("/img/%d.jpg", user.ImageID.Int64)
+}
+
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"rfc3339":   rfc3339,
 	"userURL":   userURL,
+	"userPic":   userPic,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

@@ -3,7 +3,12 @@ package main
 import (
 	"blogalusta/internal/data"
 	"blogalusta/internal/forms"
+	"bytes"
 	"errors"
+	"image"
+	"image/jpeg"
+	_ "image/png"
+	"io"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -167,7 +172,7 @@ func (app *application) handleDeletePublication(w http.ResponseWriter, r *http.R
 	}
 
 	app.session.Put(r, "flash", "Deleted a publication")
-	http.Redirect(w, r, "/user/publication", http.StatusSeeOther)
+	http.Redirect(w, r, r.URL.Path, http.StatusSeeOther)
 }
 
 func (app *application) handleShowChoosePublicationPage(w http.ResponseWriter, r *http.Request) {
@@ -182,4 +187,79 @@ func (app *application) handleShowChoosePublicationPage(w http.ResponseWriter, r
 	app.render(w, r, "choose_publication.page.gohtml", &templateData{
 		Publications: publications,
 	})
+}
+
+func (app *application) handleShowUserSettingsPage(w http.ResponseWriter, r *http.Request) {
+	app.render(w, r, "user_settings.page.gohtml", nil)
+}
+
+func (app *application) handleChangeUserProfilePicture(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseMultipartForm(int64(app.config.avatar.maxSize))
+	if err != nil {
+		app.clientError(w, http.StatusRequestEntityTooLarge)
+		app.errorLog.Print(err)
+		return
+	}
+
+	file, _, err := r.FormFile("image")
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		app.errorLog.Print(err)
+		return
+	}
+	defer file.Close()
+
+	buf := make([]byte, 512)
+	_, err = file.Read(buf)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	filetype := http.DetectContentType(buf)
+	if filetype != "image/jpeg" && filetype != "image/png" {
+		app.clientError(w, http.StatusUnsupportedMediaType)
+		app.errorLog.Print(filetype)
+		return
+	}
+
+	_, err = file.Seek(0, io.SeekStart)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	img, _, err := image.Decode(file)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	img, err = cropCenterResize(img, app.config.avatar.sideLength)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	buffer := new(bytes.Buffer)
+	err = jpeg.Encode(buffer, img, nil)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	id, err := app.models.Images.Insert(buffer.Bytes())
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = app.models.Users.ChangeProfilePicture(app.authenticatedUser(r), id)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	w.Header().Set("Refresh", "0")
+	w.WriteHeader(http.StatusCreated)
 }
