@@ -17,13 +17,16 @@
     </ul>
     {{if .Articles}}
         {{range .Articles}}
-            <section class='card mb-4 border-0'>
-                <a class='fw-bold stretched-link' href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
-                <div class='d-inline fs-6'>
-                    {{.Writer.Name}}
-                    &nbsp;
-                    <div title='{{rfc3339 .CreatedAt}}' class='d-inline'>
-                        <time datetime='{{rfc3339 .CreatedAt}}'>{{humanDate .CreatedAt}}</time>
+            <section class='card border-0 rounded-0 pt-2 pb-2'>
+                <div class='card-body'>
+                    <a class='card-title fw-bold stretched-link' href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
+                    <div class='card-text position-relative d-inline-block'>
+                        <a href='{{userURL .Writer}}' class='text-body stretched-link'>
+                            {{.Writer.Name}}
+                        </a>
+                    </div>
+                    <div title='{{rfc3339 .CreatedAt}}' class='card-text position-relative d-inline-block'>
+                        <time datetime='{{rfc3339 .CreatedAt}}' class='stretched-link'>{{humanDate .CreatedAt}}</time>
                     </div>
                 </div>
             </section>

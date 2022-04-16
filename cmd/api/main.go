@@ -32,6 +32,7 @@ var (
 	contextKeyUser        = contextKey("user")
 	contextKeyPublication = contextKey("publication")
 	contextKeyArticle     = contextKey("article")
+	contextKeyProfile     = contextKey("profileUser")
 )
 
 type config struct {

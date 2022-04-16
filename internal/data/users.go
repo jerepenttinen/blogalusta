@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/gosimple/slug"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -20,6 +21,10 @@ type User struct {
 	HashedPassword []byte
 	CreatedAt      time.Time
 	Version        int
+}
+
+func (u *User) Matches(url string) bool {
+	return url == slug.Make(u.Name)
 }
 
 type UserModel struct {

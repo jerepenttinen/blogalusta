@@ -106,7 +106,7 @@ func (app *application) addPublicationToContext(next http.Handler) http.Handler 
 
 func (app *application) addArticleToContext(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		url, id, err := app.getArticleSlugAndId(chi.URLParam(r, "articleSlug"))
+		url, id, err := app.getSlugAndId(chi.URLParam(r, "articleSlug"))
 		if err != nil {
 			app.clientError(w, http.StatusBadRequest)
 			return
@@ -127,6 +127,33 @@ func (app *application) addArticleToContext(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), contextKeyArticle, article)
+		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (app *application) addProfileToContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		url, id, err := app.getSlugAndId(chi.URLParam(r, "profileSlug"))
+		if err != nil {
+			app.clientError(w, http.StatusBadRequest)
+			return
+		}
+
+		user, err := app.models.Users.Get(id)
+		if err == data.ErrRecordNotFound {
+			app.clientError(w, http.StatusNotFound)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		if !user.Matches(url) {
+			app.clientError(w, http.StatusNotFound)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextKeyProfile, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

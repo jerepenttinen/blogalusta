@@ -7,9 +7,14 @@
         <article class='pt-5 text-wrap fs-5 lh-base'>
             <h1>{{.Title}}</h1>
             <div class='fs-6 mb-3'>
-                {{.Writer.Name}}
-                <div title='{{rfc3339 .CreatedAt}}'>
-                    <time datetime='{{rfc3339 .CreatedAt}}'>{{humanDate .CreatedAt}}</time>
+                <div class='position-relative d-inline-block'>
+                    <a href='{{userURL .Writer}}' class='stretched-link'>
+                        {{.Writer.Name}}
+                    </a>
+                </div>
+                &nbsp;
+                <div title='{{rfc3339 .CreatedAt}}' class='position-relative d-inline-block'>
+                    <time datetime='{{rfc3339 .CreatedAt}}' class='stretched-link'>{{humanDate .CreatedAt}}</time>
                 </div>
             </div>
 

@@ -53,6 +53,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 		td.HTML = template.HTML(app.markdownToHTML(td.Article.Content))
 		td.Article.Writer, _ = app.models.Users.Get(int(td.Article.WriterID))
 	}
+	td.ProfileUser = app.profileUser(r)
 	return td
 }
 
@@ -90,10 +91,10 @@ func (app *application) publication(r *http.Request) *data.Publication {
 	return publication
 }
 
-func (app *application) getArticleSlugAndId(url string) (string, int, error) {
+func (app *application) getSlugAndId(url string) (string, int, error) {
 	i := strings.LastIndex(url, "-")
 	if i == -1 {
-		return "", 0, errors.New("invalid article url")
+		return "", 0, errors.New("invalid slug")
 	}
 
 	slug := url[:i]
@@ -114,4 +115,12 @@ func (app *application) article(r *http.Request) *data.Article {
 		return nil
 	}
 	return article
+}
+
+func (app *application) profileUser(r *http.Request) *data.User {
+	user, ok := r.Context().Value(contextKeyProfile).(*data.User)
+	if !ok {
+		return nil
+	}
+	return user
 }

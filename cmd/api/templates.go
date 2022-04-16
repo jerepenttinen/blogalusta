@@ -4,6 +4,7 @@ import (
 	"blogalusta/internal/data"
 	"blogalusta/internal/forms"
 	"fmt"
+	"github.com/gosimple/slug"
 	"html/template"
 	"path/filepath"
 	"time"
@@ -20,6 +21,7 @@ type templateData struct {
 	Article           *data.Article
 	Articles          []*data.Article
 	HTML              template.HTML
+	ProfileUser       *data.User
 }
 
 func humanDate(t time.Time) string {
@@ -50,9 +52,14 @@ func rfc3339(t time.Time) string {
 	return t.UTC().Format(time.RFC3339)
 }
 
+func userURL(user *data.User) string {
+	return fmt.Sprintf("/user/%s-%d", slug.Make(user.Name), user.ID)
+}
+
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"rfc3339":   rfc3339,
+	"userURL":   userURL,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

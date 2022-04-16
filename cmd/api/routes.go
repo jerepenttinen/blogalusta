@@ -27,9 +27,9 @@ func (app *application) routes() *chi.Mux {
 			r.Post("/logout", app.handleLogout)
 			r.Get("/publication/create", app.handleShowCreatePublicationPage)
 			r.Post("/publication/create", app.handleCreatePublication)
-			r.Get("/profile", app.handleShowMyProfilePage)
 			r.Post("/publication/delete", app.handleDeletePublication)
 			r.Get("/article", app.handleShowChoosePublicationPage)
+			r.With(app.addProfileToContext).Get("/{profileSlug:[a-z0-9-]+-[0-9]+}", app.handleShowProfilePage)
 		})
 	})
 

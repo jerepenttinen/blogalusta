@@ -1,0 +1,4 @@
+.card:hover {
+    filter: brightness(92%);
+    transition: all 10ms ease;
+}

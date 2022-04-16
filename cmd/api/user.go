@@ -3,6 +3,7 @@ package main
 import (
 	"blogalusta/internal/data"
 	"blogalusta/internal/forms"
+	"errors"
 	"net/http"
 	"net/mail"
 	"strconv"
@@ -126,8 +127,12 @@ func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.R
 	http.Redirect(w, r, "/"+url, http.StatusSeeOther)
 }
 
-func (app *application) handleShowMyProfilePage(w http.ResponseWriter, r *http.Request) {
-	user := app.authenticatedUser(r)
+func (app *application) handleShowProfilePage(w http.ResponseWriter, r *http.Request) {
+	user := app.profileUser(r)
+	if user == nil {
+		app.serverError(w, errors.New("profile user not found"))
+		return
+	}
 
 	publications, err := app.models.Publications.GetUsersPublications(user.ID)
 	if err != nil {

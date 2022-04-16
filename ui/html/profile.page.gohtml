@@ -3,14 +3,16 @@
 {{define "title"}}{{.AuthenticatedUser.Name}}{{end}}
 
 {{define "body"}}
-    <h3 class='text-body'>My publications</h3>
+    <h3 class='text-body'>{{.ProfileUser.Name}}</h3>
 
     {{with .Publications.WritesOn}}
-        <b>Writes</b>
+        <div class='mb-1'>
+            <b>Writes</b>
+        </div>
         <div class='container mb-3'>
             <div class='row row-cols-1'>
                 {{range .}}
-                    <section class='card border-0'>
+                    <section class='card border-0 rounded-0'>
                         <div class='card-body'>
                             <a href='/{{.URL}}'
                                class='card-title fw-bold text-body text-truncate mr-auto stretched-link'>
@@ -32,15 +34,19 @@
     {{end}}
 
     {{with .Publications.SubscribesTo}}
-        <b>Subscribes</b>
+        <div class='mb-1'>
+            <b>Subscribes</b>
+        </div>
         <div class='container mb-3'>
-            <div class='row row-cols-3'>
+            <div class='row gap-3'>
                 {{range .}}
-                    <a href='/{{.URL}}' class='pb-3 pt-3'>
-                        <div class='col'>
-                            <b class='text-body text-truncate'>{{.Name}}</b>
+                    <content class='col card'>
+                        <div class='card-body'>
+                            <a href='/{{.URL}}' class='card-title stretched-link'>
+                                <b class='text-body text-truncate'>{{.Name}}</b>
+                            </a>
                         </div>
-                    </a>
+                    </content>
                 {{end}}
             </div>
         </div>
