@@ -3,34 +3,29 @@
 {{define "title"}}Signup{{end}}
 
 {{define "body"}}
-    <h1>Signup</h1>
+    <h4>Signup</h4>
     <form action='/user/signup' method='post'>
         <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
         {{with .Form}}
-            <div>
-                <label for='name-input'>Name:</label>
+            <div class='input-group-lg mb-4'>
                 {{with .Errors.Get "name"}}
                     <label class='error'>{{.}}</label>
                 {{end}}
-                <input type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' required>
+                <input class='form-control' placeholder='Name' type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' required>
             </div>
-            <div>
-                <label for='email-input'>Email:</label>
+            <div class='input-group-lg mb-4'>
                 {{with .Errors.Get "email"}}
                     <label class='error'>{{.}}</label>
                 {{end}}
-                <input type='email' name='email' id='email-input' value='{{.Get "email"}}' required>
+                <input class='form-control' placeholder='Email' type='email' name='email' id='email-input' value='{{.Get "email"}}' required>
             </div>
-            <div>
-                <label for='password-input'>Password:</label>
+            <div class='input-group-lg mb-4'>
                 {{with .Errors.Get "password"}}
                     <label class='error'>{{.}}</label>
                 {{end}}
-                <input type='password' name='password' id='password-input' value='{{.Get "password"}}' minlength='10' maxlength='72' required>
+                <input class='form-control' placeholder='Password' type='password' name='password' id='password-input' value='{{.Get "password"}}' minlength='10' maxlength='72' required>
             </div>
-            <div>
-                <input type='submit' value='Signup'>
-            </div>
+            <input type='submit' value='Signup' class='btn btn-primary mb-4'>
         {{end}}
     </form>
 {{end}}

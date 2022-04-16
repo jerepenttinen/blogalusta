@@ -3,6 +3,7 @@ package main
 import (
 	"blogalusta/internal/data"
 	"blogalusta/internal/forms"
+	"fmt"
 	"html/template"
 	"path/filepath"
 	"time"
@@ -25,11 +26,33 @@ func humanDate(t time.Time) string {
 	if t.IsZero() {
 		return ""
 	}
-	return t.UTC().Format("02 Jan 2006 at 15:04")
+
+	now := time.Now().UTC()
+
+	if t.UTC().Year() != now.Year() {
+		return t.UTC().Format("02 Jan 2006")
+	}
+
+	diff := time.Now().UTC().Sub(t.UTC())
+
+	if diff.Minutes() < 2 {
+		return "Just now"
+	} else if diff.Minutes() < 60 {
+		return fmt.Sprintf("%d mins ago", int(diff.Minutes()))
+	} else if diff.Hours() < 24 {
+		return fmt.Sprintf("%d hours ago", int(diff.Hours()))
+	} else {
+		return t.UTC().Format("02 Jan")
+	}
+}
+
+func rfc3339(t time.Time) string {
+	return t.UTC().Format(time.RFC3339)
 }
 
 var functions = template.FuncMap{
 	"humanDate": humanDate,
+	"rfc3339":   rfc3339,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

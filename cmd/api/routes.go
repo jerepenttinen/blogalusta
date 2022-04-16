@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"strings"
 )
 
 func (app *application) routes() *chi.Mux {
@@ -21,21 +22,51 @@ func (app *application) routes() *chi.Mux {
 		r.Post("/signup", app.handleSignup)
 		r.Get("/login", app.handleShowLoginPage)
 		r.Post("/login", app.handleLogin)
-		r.With(app.requireAuthenticatedUser).Post("/logout", app.handleLogout)
-		r.With(app.requireAuthenticatedUser).Get("/publication/create", app.handleShowCreatePublicationPage)
-		r.With(app.requireAuthenticatedUser).Post("/publication/create", app.handleCreatePublication)
-		r.With(app.requireAuthenticatedUser).Get("/publication", app.handleShowMyPublicationsPage)
-		r.With(app.requireAuthenticatedUser).Post("/publication/delete", app.handleDeletePublication)
+		r.Route("/", func(r chi.Router) {
+			r.Use(app.requireAuthenticatedUser)
+			r.Post("/logout", app.handleLogout)
+			r.Get("/publication/create", app.handleShowCreatePublicationPage)
+			r.Post("/publication/create", app.handleCreatePublication)
+			r.Get("/publication", app.handleShowMyPublicationsPage)
+			r.Post("/publication/delete", app.handleDeletePublication)
+			r.Get("/article", app.handleShowChoosePublicationPage)
+		})
 	})
 
 	r.Route("/{publicationSlug:[a-z-]+}", func(r chi.Router) {
 		r.Use(app.addPublicationToContext)
 		r.Use(dynamic...)
 		r.Get("/", app.handleShowPublicationPage)
-		r.With(app.requireAuthenticatedUser).Get("/article", app.handleShowCreateArticlePage)
-		r.With(app.requireAuthenticatedUser).Post("/article", app.handleCreateArticle)
 		r.With(app.addArticleToContext).Get("/{articleSlug:[a-z0-9-]+-[0-9]+}", app.handleShowArticlePage)
+		r.Route("/", func(r chi.Router) {
+			r.Use(app.requireAuthenticatedUser)
+			r.Get("/article", app.handleShowCreateArticlePage)
+			r.Post("/article", app.handleCreateArticle)
+		})
 	})
 
+	FileServer(r, "/static", http.Dir("./ui/static/"))
+
 	return r
+}
+
+// FileServer conveniently sets up a http.FileServer handler to serve
+// static files from a http.FileSystem.
+func FileServer(r chi.Router, path string, root http.FileSystem) {
+	if strings.ContainsAny(path, "{}*") {
+		panic("FileServer does not permit any URL parameters.")
+	}
+
+	if path != "/" && path[len(path)-1] != '/' {
+		r.Get(path, http.RedirectHandler(path+"/", 301).ServeHTTP)
+		path += "/"
+	}
+	path += "*"
+
+	r.Get(path, func(w http.ResponseWriter, r *http.Request) {
+		ctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(ctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, http.FileServer(root))
+		fs.ServeHTTP(w, r)
+	})
 }

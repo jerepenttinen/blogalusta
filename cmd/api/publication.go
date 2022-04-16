@@ -37,7 +37,7 @@ func (app *application) handleShowArticlePage(w http.ResponseWriter, r *http.Req
 }
 
 func (app *application) handleShowCreateArticlePage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "create_article.page.gohtml", &templateData{
+	app.render(w, r, "new_article.page.gohtml", &templateData{
 		Form: forms.New(nil),
 	})
 }
@@ -67,7 +67,7 @@ func (app *application) handleCreateArticle(w http.ResponseWriter, r *http.Reque
 	form.Required("content", "title")
 
 	if !form.Valid() {
-		app.render(w, r, "create_article.page.gohtml", &templateData{
+		app.render(w, r, "new_article.page.gohtml", &templateData{
 			Form: form,
 		})
 		return

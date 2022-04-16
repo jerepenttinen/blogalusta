@@ -164,3 +164,17 @@ func (app *application) handleDeletePublication(w http.ResponseWriter, r *http.R
 	app.session.Put(r, "flash", "Deleted a publication")
 	http.Redirect(w, r, "/user/publication", http.StatusSeeOther)
 }
+
+func (app *application) handleShowChoosePublicationPage(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+
+	publications, err := app.models.Publications.GetUsersPublications(user.ID)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "choose_publication.page.gohtml", &templateData{
+		Publications: publications,
+	})
+}

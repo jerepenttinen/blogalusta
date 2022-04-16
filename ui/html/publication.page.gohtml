@@ -3,21 +3,28 @@
 {{define "title"}}{{.Publication.Name}}{{end}}
 
 {{define "body"}}
-    {{if .IsWriter}}
-        <a href='/{{$.Publication.URL}}/article'>New article</a>
-    {{end}}
-    {{with .Publication}}
-        <h1>{{.Name}}</h1>
-        <pre>{{.Description}}</pre>
-    {{end}}
-    <ul>
-        {{range .Articles}}
-            <li>
-                <section>
-                    <a href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
-                    <p>{{.CreatedAt}} {{.Writer.Name}}</p>
-                </section>
-            </li>
-        {{end}}
+    <ul class='nav justify-content-center'>
+        <li class='nav-item'>
+            <a href='/{{.Publication.URL}}' class='nav-link active'>
+                Articles
+            </a>
+        </li>
+        <li class='nav-item'>
+            <a href='/{{.Publication.URL}}/about' class='nav-link'>
+                About
+            </a>
+        </li>
     </ul>
+    {{range .Articles}}
+        <section class='m-4'>
+            <a class='fw-bold' href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
+            <div class='d-inline fs-6'>
+                {{.Writer.Name}}
+                &nbsp;
+                <div title='{{rfc3339 .CreatedAt}}' class='d-inline'>
+                    <time datetime='{{rfc3339 .CreatedAt}}'>{{humanDate .CreatedAt}}</time>
+                </div>
+            </div>
+        </section>
+    {{end}}
 {{end}}

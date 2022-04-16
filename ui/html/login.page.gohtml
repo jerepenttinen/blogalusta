@@ -3,24 +3,21 @@
 {{define "title"}}Login{{end}}
 
 {{define "body"}}
-    <h1>Login</h1>
+    <h4>Login</h4>
     <form action='/user/login' method='post'>
         <input type='hidden' name='csrf_token' value='{{$.CSRFToken}}'>
         {{with .Form}}
             {{with .Errors.Get "generic"}}
                 <div class='error'>{{.}}</div>
             {{end}}
-            <div>
-                <label for='email-input'>Email:</label>
-                <input type='email' name='email' id='email-input' value='{{.Get "email"}}' required>
+            <div class='input-group-lg mb-4'>
+                <input class='form-control' type='email' name='email' id='email-input' value='{{.Get "email"}}' placeholder='Email' required>
             </div>
-            <div>
-                <label for='password-input'>Password:</label>
-                <input type='password' name='password' id='password-input' value='{{.Get "password"}}' minlength='10' maxlength='72' required>
+            <div class='input-group-lg mb-4'>
+                <input class='form-control'  type='password' name='password' id='password-input' value='{{.Get "password"}}' minlength='10'
+                       maxlength='72' placeholder='Password' required>
             </div>
-            <div>
-                <input type='submit' value='Login'>
-            </div>
+            <input type='submit' value='Login' class='btn btn-primary mb-4'>
         {{end}}
     </form>
 {{end}}

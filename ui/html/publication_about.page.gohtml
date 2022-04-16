@@ -1,0 +1,23 @@
+{{template "base" .}}
+
+{{define "title"}}About {{.Publication.Name}}{{end}}
+
+{{define "body"}}
+    <ul class='nav justify-content-center'>
+        <li class='nav-item'>
+            <a href='/{{.Publication.URL}}' class='nav-link'>
+                Articles
+            </a>
+        </li>
+        <li class='nav-item'>
+            <a href='/{{.Publication.URL}}/about' class='nav-link active'>
+                About
+            </a>
+        </li>
+    </ul>
+    {{range .Publication}}
+        <section class='m-4'>
+            {{.Description}}
+        </section>
+    {{end}}
+{{end}}

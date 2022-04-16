@@ -1,0 +1,16 @@
+{{template "base" .}}
+
+{{define "title"}}Choose publication{{end}}
+
+{{define "body"}}
+    <h4>Choose publication</h4>
+    {{if .Publications.WritesOn}}
+        <div class='list-group'>
+            {{range .Publications.WritesOn}}
+                <a class='list-group-item list-group-item-action' href='/{{.URL}}/article'>{{.Name}}</a>
+            {{end}}
+        </div>
+    {{else}}
+        <p>No publications found...</p>
+    {{end}}
+{{end}}
