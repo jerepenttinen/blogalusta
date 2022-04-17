@@ -2,6 +2,14 @@
 
 {{define "title"}}{{.Article.Title}}{{end}}
 
+{{define "nav"}}
+    {{if userIn .AuthenticatedUser .Writers}}
+        {{template "newarticlebutton" $}}
+    {{else}}
+        {{template "subscribebutton" $}}
+    {{end}}
+{{end}}
+
 {{define "body"}}
     {{with .Article}}
         <article class='pt-5 text-wrap fs-5 lh-base'>
@@ -20,7 +28,9 @@
                 </div>
             </div>
 
-            {{$.HTML}}
+            <div class='md'>
+                {{$.HTML}}
+            </div>
         </article>
     {{end}}
 {{end}}

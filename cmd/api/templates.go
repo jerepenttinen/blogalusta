@@ -18,6 +18,7 @@ type templateData struct {
 	Publication       *data.Publication
 	Publications      *data.Publications
 	IsWriter          bool
+	IsSubscribed      bool
 	Writers           []*data.User
 	Article           *data.Article
 	Articles          []*data.Article
@@ -66,11 +67,22 @@ func userPic(user *data.User) string {
 	return fmt.Sprintf("/img/%d.jpg", user.ImageID.Int64)
 }
 
+func userIn(user *data.User, users []*data.User) bool {
+	for _, u := range users {
+		if user.ID == u.ID {
+			return true
+		}
+	}
+
+	return false
+}
+
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"rfc3339":   rfc3339,
 	"userURL":   userURL,
 	"userPic":   userPic,
+	"userIn":    userIn,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
@@ -84,12 +96,12 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		ts, err := template.New(name).Funcs(functions).ParseFiles(page)
+		ts, err := template.New(name).Funcs(functions).ParseGlob(filepath.Join(dir, "*.layout.gohtml"))
 		if err != nil {
 			return nil, err
 		}
 
-		ts, err = ts.ParseGlob(filepath.Join(dir, "*.layout.gohtml"))
+		ts, err = ts.ParseFiles(page)
 		if err != nil {
 			return nil, err
 		}

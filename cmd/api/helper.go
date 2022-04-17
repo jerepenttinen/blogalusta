@@ -56,6 +56,8 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 		td.Article.Writer, _ = app.models.Users.Get(int(td.Article.WriterID))
 	}
 	td.ProfileUser = app.profileUser(r)
+	td.Writers = app.writers(r)
+	td.IsSubscribed, _ = app.models.Publications.UserIsSubscribed(td.Publication, td.AuthenticatedUser)
 	return td
 }
 
@@ -125,6 +127,14 @@ func (app *application) profileUser(r *http.Request) *data.User {
 		return nil
 	}
 	return user
+}
+
+func (app *application) writers(r *http.Request) []*data.User {
+	writers, ok := r.Context().Value(contextKeyWriters).([]*data.User)
+	if !ok {
+		return nil
+	}
+	return writers
 }
 
 func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {

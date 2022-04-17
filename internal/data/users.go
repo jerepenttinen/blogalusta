@@ -148,3 +148,35 @@ func (m *UserModel) ChangeProfilePicture(user *User, id int) error {
 
 	return nil
 }
+
+func (m *UserModel) SubscribeTo(user *User, publication *Publication) error {
+	query := `
+		INSERT INTO subscribes_to (user_id, publication_id)
+		VALUES ($1, $2)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, user.ID, publication.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserModel) UnsubscribeFrom(user *User, publication *Publication) error {
+	query := `
+		DELETE FROM subscribes_to
+		WHERE user_id = $1 AND publication_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, user.ID, publication.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

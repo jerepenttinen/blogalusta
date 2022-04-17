@@ -99,7 +99,13 @@ func (app *application) addPublicationToContext(next http.Handler) http.Handler 
 			return
 		}
 
+		writers, err := app.models.Users.GetWritersOfPublication(publication)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
 		ctx := context.WithValue(r.Context(), contextKeyPublication, publication)
+		ctx = context.WithValue(ctx, contextKeyWriters, writers)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

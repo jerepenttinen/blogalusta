@@ -48,6 +48,8 @@ func (app *application) routes() *chi.Mux {
 			r.Use(app.requireAuthenticatedUser)
 			r.Get("/article", app.handleShowCreateArticlePage)
 			r.Post("/article", app.handleCreateArticle)
+			r.Post("/subscribe", app.handleSubscribe)
+			r.Post("/unsubscribe", app.handleUnsubscribe)
 		})
 	})
 

@@ -2,6 +2,14 @@
 
 {{define "title"}}About {{.Publication.Name}}{{end}}
 
+{{define "nav"}}
+    {{if userIn .AuthenticatedUser .Writers}}
+        {{template "newarticlebutton" $}}
+    {{else}}
+        {{template "subscribebutton" $}}
+    {{end}}
+{{end}}
+
 {{define "body"}}
     <ul class='nav justify-content-center'>
         <li class='nav-item'>
@@ -21,10 +29,10 @@
         </section>
     {{end}}
     <div class='container mb-3'>
-        <div class='row gap-3'>
-            <b>Writers</b>
+        <b class='mb-3'>Writers</b>
+        <div class='row row-cols-2 gap-3'>
             {{range .Writers}}
-                <content class='col card'>
+                <content class='col card border-0' style='margin: -0.25em -0.25em'>
                     <div class='card-body'>
                         <img class='rounded-circle me-4' src='{{userPic .}}'
                              alt='Profile pic' width='92'>

@@ -181,7 +181,7 @@ func (m *PublicationModel) Insert(userID int64, name, description string) (strin
 	return url, nil
 }
 
-func (m *PublicationModel) UserIsWriter(user *User, publication *Publication) (bool, error) {
+func (m *PublicationModel) UserIsWriter(publication *Publication, user *User) (bool, error) {
 	if user == nil || publication == nil {
 		return false, nil
 	}
@@ -190,6 +190,31 @@ func (m *PublicationModel) UserIsWriter(user *User, publication *Publication) (b
 		SELECT 1
 		FROM writes_on wo
 		WHERE wo.user_id = $1 AND wo.publication_id = $2
+		LIMIT 1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var exists int
+	err := m.DB.QueryRowContext(ctx, query, user.ID, publication.ID).Scan(&exists)
+	if err == sql.ErrNoRows {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
+}
+
+func (m *PublicationModel) UserIsSubscribed(publication *Publication, user *User) (bool, error) {
+	if user == nil || publication == nil {
+		return false, nil
+	}
+
+	query := `
+		SELECT 1
+		FROM subscribes_to st
+		WHERE st.user_id = $1 AND st.publication_id = $2
 		LIMIT 1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)

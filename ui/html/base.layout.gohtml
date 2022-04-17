@@ -24,12 +24,12 @@
                 {{end}}
                 <ul class='navbar-nav'>
                     {{if .AuthenticatedUser}}
-                        <li class='nav-item'>
-                            <a href='/user/article' class='btn btn-primary me-2'>New article</a>
-                        </li>
+                        {{block "nav" .}}
+                            {{template "newarticlebutton" .}}
+                        {{end}}
                         <li class='nav-item dropdown'>
                             <a href='#' class='dropdown-toggle dropdown-toggle-remove' data-bs-toggle='dropdown'>
-                                <img class='rounded-circle'  src='{{userPic .AuthenticatedUser}}'
+                                <img class='rounded-circle' src='{{userPic .AuthenticatedUser}}'
                                      alt='Profile pic' width='40'>
                             </a>
                             <ul class='dropdown-menu dropdown-menu-end' style='min-width: max-content'>
@@ -49,13 +49,17 @@
                                         </div>
                                     </div>
                                 </li>
-                                <li><hr class='dropdown-divider'></li>
+                                <li>
+                                    <hr class='dropdown-divider'>
+                                </li>
                                 <li>
                                     <a href='{{userURL .AuthenticatedUser}}' class='dropdown-item py-2'>Profile</a>
                                 </li>
                                 <li><a href='#' class='dropdown-item py-2'>Invitations</a></li>
                                 <li><a href='/user/settings' class='dropdown-item py-2'>Settings</a></li>
-                                <li><hr class='dropdown-divider'></li>
+                                <li>
+                                    <hr class='dropdown-divider'>
+                                </li>
                                 <li>
                                     <form action='/user/logout' method='post'>
                                         {{template "csrf" $}}

@@ -21,3 +21,8 @@ a:link {
     vertical-align: 0;
     margin-left: 0;
 }
+
+.md img {
+    max-width: 100%;
+    height: auto;
+}

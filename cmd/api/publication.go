@@ -39,7 +39,7 @@ func (app *application) handleCreateArticle(w http.ResponseWriter, r *http.Reque
 	user := app.authenticatedUser(r)
 	publication := app.publication(r)
 
-	isWriter, err := app.models.Publications.UserIsWriter(user, publication)
+	isWriter, err := app.models.Publications.UserIsWriter(publication, user)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -85,4 +85,49 @@ func (app *application) handleShowPublicationAboutPage(w http.ResponseWriter, r 
 	app.render(w, r, "publication_about.page.gohtml", &templateData{
 		Writers: writers,
 	})
+}
+
+func (app *application) handleSubscribe(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+	publication := app.publication(r)
+
+	isSubscribed, err := app.models.Publications.UserIsSubscribed(publication, user)
+	if isSubscribed || err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	// don't allow writers to subscribe
+	isWriter, err := app.models.Publications.UserIsWriter(publication, user)
+	if isWriter || err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = app.models.Users.SubscribeTo(user, publication)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	http.Redirect(w, r, "/"+publication.URL, http.StatusSeeOther)
+}
+
+func (app *application) handleUnsubscribe(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+	publication := app.publication(r)
+
+	isSubscribed, err := app.models.Publications.UserIsSubscribed(publication, user)
+	if !isSubscribed || err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = app.models.Users.UnsubscribeFrom(user, publication)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	http.Redirect(w, r, "/"+publication.URL, http.StatusSeeOther)
 }

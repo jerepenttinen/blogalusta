@@ -31,6 +31,7 @@ type contextKey string
 var (
 	contextKeyUser        = contextKey("user")
 	contextKeyPublication = contextKey("publication")
+	contextKeyWriters     = contextKey("writers")
 	contextKeyArticle     = contextKey("article")
 	contextKeyProfile     = contextKey("profileUser")
 )

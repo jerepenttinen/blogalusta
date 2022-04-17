@@ -4,6 +4,8 @@
 
 {{define "body"}}
     {{with .Publication}}
+        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
+        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
         <form action='/{{.URL}}/article' method='post' id='form' style='margin-top: 5px;'>
             {{template "csrf" $}}
             {{with $.Form}}
@@ -11,7 +13,8 @@
                     {{with .Errors.Get "title"}}
                         <label class='error'>{{.}}</label>
                     {{end}}
-                    <input class='form-control' type='text' name='title' id='title-input' value='{{.Get "title"}}' placeholder='Title'>
+                    <input class='form-control' type='text' name='title' id='title-input' value='{{.Get "title"}}'
+                           placeholder='Title'>
                 </div>
                 <div class='mb-3'>
                     {{with .Errors.Get "content"}}
@@ -20,14 +23,14 @@
                     <textarea name='content'
                               id="content-input"
                               rows='30'
-                              required
-                              spellcheck='true'
-                              class='form-control'
-                              placeholder='Content'
                     >{{.Get "content"}}</textarea>
                 </div>
                 <button type='submit' class='btn btn-primary'>Post</button>
             {{end}}
         </form>
+
+        <script>
+            const easyMDE = new EasyMDE({element: document.getElementById('content-input')});
+        </script>
     {{end}}
 {{end}}
