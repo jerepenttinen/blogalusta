@@ -2,6 +2,12 @@
 
 {{define "title"}}Creating article{{end}}
 
+{{define "nav"}}
+    <li class='nav-item'>
+        <button form='form' class='btn btn-primary me-2'>Publish</button>
+    </li>
+{{end}}
+
 {{define "body"}}
     {{with .Publication}}
         <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
@@ -10,22 +16,15 @@
             {{template "csrf" $}}
             {{with $.Form}}
                 <div class='input-group-lg mb-3'>
-                    {{with .Errors.Get "title"}}
-                        <label class='error'>{{.}}</label>
-                    {{end}}
                     <input class='form-control' type='text' name='title' id='title-input' value='{{.Get "title"}}'
                            placeholder='Title'>
                 </div>
                 <div class='mb-3'>
-                    {{with .Errors.Get "content"}}
-                        <label class='error'>{{.}}</label>
-                    {{end}}
                     <textarea name='content'
                               id="content-input"
                               rows='30'
                     >{{.Get "content"}}</textarea>
                 </div>
-                <button type='submit' class='btn btn-primary'>Post</button>
             {{end}}
         </form>
 

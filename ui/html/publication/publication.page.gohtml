@@ -4,7 +4,7 @@
 
 {{define "nav"}}
     {{if userIn .AuthenticatedUser .Writers}}
-        {{template "newarticlebutton" $}}
+        {{template "newarticlepublication" $}}
     {{else}}
         {{template "subscribebutton" $}}
     {{end}}
@@ -13,7 +13,7 @@
 {{define "body"}}
     <ul class='nav justify-content-center'>
         <li class='nav-item'>
-            <a href='/{{.Publication.URL}}' class='nav-link active'>
+            <a href='/{{.Publication.URL}}' class='nav-link'>
                 Articles
             </a>
         </li>
@@ -22,6 +22,15 @@
                 About
             </a>
         </li>
+        {{if .AuthenticatedUser}}
+            {{if eq .AuthenticatedUser.ID .Publication.OwnerID}}
+                <li class='nav-item'>
+                    <a href='/{{.Publication.URL}}/settings' class='nav-link active'>
+                        Settings
+                    </a>
+                </li>
+            {{end}}
+        {{end}}
     </ul>
     {{if .Articles}}
         {{range .Articles}}

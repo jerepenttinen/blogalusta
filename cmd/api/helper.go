@@ -48,6 +48,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	}
 	td.CSRFToken = nosurf.Token(r)
 	td.CurrentYear = time.Now().Year()
+	td.Flash = app.session.PopString(r, "flash")
 	td.AuthenticatedUser = app.authenticatedUser(r)
 	td.Publication = app.publication(r)
 	td.Article = app.article(r)
@@ -58,6 +59,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.ProfileUser = app.profileUser(r)
 	td.Writers = app.writers(r)
 	td.IsSubscribed, _ = app.models.Publications.UserIsSubscribed(td.Publication, td.AuthenticatedUser)
+	td.Pending = app.pending(r)
 	return td
 }
 
@@ -135,6 +137,14 @@ func (app *application) writers(r *http.Request) []*data.User {
 		return nil
 	}
 	return writers
+}
+
+func (app *application) pending(r *http.Request) []*data.User {
+	pending, ok := r.Context().Value(contextKeyPending).([]*data.User)
+	if !ok {
+		return nil
+	}
+	return pending
 }
 
 func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {

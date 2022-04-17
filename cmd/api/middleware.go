@@ -104,8 +104,16 @@ func (app *application) addPublicationToContext(next http.Handler) http.Handler 
 			app.serverError(w, err)
 			return
 		}
+
+		pending, err := app.models.Users.GetPendingInvitations(publication)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
 		ctx := context.WithValue(r.Context(), contextKeyPublication, publication)
 		ctx = context.WithValue(ctx, contextKeyWriters, writers)
+		ctx = context.WithValue(ctx, contextKeyPending, pending)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
@@ -161,5 +169,28 @@ func (app *application) addProfileToContext(next http.Handler) http.Handler {
 
 		ctx := context.WithValue(r.Context(), contextKeyProfile, user)
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (app *application) requireUserIsWriter(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		isWriter, err := app.models.Publications.UserIsWriter(app.publication(r), app.authenticatedUser(r))
+		if !isWriter || err != nil {
+			app.clientError(w, http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) requireUserIsOwner(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if app.publication(r).OwnerID != app.authenticatedUser(r).ID {
+			app.clientError(w, http.StatusUnauthorized)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }

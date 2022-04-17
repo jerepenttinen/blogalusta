@@ -42,8 +42,8 @@ func (app *application) handleSignup(w http.ResponseWriter, r *http.Request) {
 	email, _ := mail.ParseAddress(form.Get("email"))
 
 	err = app.models.Users.Insert(form.Get("name"), email.Address, form.Get("password"))
-	if err == data.ErrDuplicateEmail {
-		form.Errors.Add("email", "Address is already in use")
+	if err == data.ErrDuplicateRecord {
+		app.session.Put(r, "flash", "Email address already in use")
 		app.render(w, r, "signup.page.gohtml", &templateData{Form: form})
 		return
 	} else if err != nil {
@@ -75,7 +75,7 @@ func (app *application) handleLogin(w http.ResponseWriter, r *http.Request) {
 		app.errorLog.Print(err)
 	}
 	if err == data.ErrInvalidCredentials {
-		form.Errors.Add("generic", "Email or Password is incorrect")
+		app.session.Put(r, "flash", "Email or Password is incorrect")
 		app.render(w, r, "login.page.gohtml", &templateData{Form: form})
 		return
 	} else if err != nil {
@@ -113,14 +113,15 @@ func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.R
 	form.RestrictedValues("name", "user")
 
 	if !form.Valid() {
+		app.session.Put(r, "flash", form.Errors.Get("name"))
 		app.render(w, r, "create_publication.page.gohtml", &templateData{Form: form})
 		return
 	}
 
 	user := app.authenticatedUser(r)
 	url, err := app.models.Publications.Insert(user.ID, form.Get("name"), form.Get("description"))
-	if err == data.ErrDuplicateUrl {
-		form.Errors.Add("name", "Title already in use")
+	if err == data.ErrDuplicateRecord {
+		app.session.Put(r, "flash", "Publication name already in use")
 		app.render(w, r, "create_publication.page.gohtml", &templateData{Form: form})
 		return
 	} else if err != nil {

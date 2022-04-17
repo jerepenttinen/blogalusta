@@ -8,21 +8,12 @@
         {{template "csrf" $}}
         {{with .Form}}
             <div class='input-group-lg mb-4'>
-                {{with .Errors.Get "name"}}
-                    <label class='error'>{{.}}</label>
-                {{end}}
                 <input class='form-control' placeholder='Name' type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' required>
             </div>
             <div class='input-group-lg mb-4'>
-                {{with .Errors.Get "email"}}
-                    <label class='error'>{{.}}</label>
-                {{end}}
                 <input class='form-control' placeholder='Email' type='email' name='email' id='email-input' value='{{.Get "email"}}' required>
             </div>
             <div class='input-group-lg mb-4'>
-                {{with .Errors.Get "password"}}
-                    <label class='error'>{{.}}</label>
-                {{end}}
                 <input class='form-control' placeholder='Password' type='password' name='password' id='password-input' value='{{.Get "password"}}' minlength='10' maxlength='72' required>
             </div>
             <input type='submit' value='Signup' class='btn btn-primary mb-4'>

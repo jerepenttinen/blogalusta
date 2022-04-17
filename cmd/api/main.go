@@ -32,6 +32,7 @@ var (
 	contextKeyUser        = contextKey("user")
 	contextKeyPublication = contextKey("publication")
 	contextKeyWriters     = contextKey("writers")
+	contextKeyPending     = contextKey("pending")
 	contextKeyArticle     = contextKey("article")
 	contextKeyProfile     = contextKey("profileUser")
 )

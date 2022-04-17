@@ -27,7 +27,7 @@ func (f *Form) Required(fields ...string) {
 	for _, field := range fields {
 		value := f.Get(field)
 		if strings.TrimSpace(value) == "" {
-			f.Errors.Add(field, "This field cannot be blank")
+			f.Errors.Add(field, fmt.Sprintf("Field %s cannot be blank", field))
 		}
 	}
 }
@@ -38,7 +38,7 @@ func (f *Form) MaxLength(field string, d int) {
 		return
 	}
 	if utf8.RuneCountInString(value) > d {
-		f.Errors.Add(field, fmt.Sprintf("This field is too long (maximum is %d characters)", d))
+		f.Errors.Add(field, fmt.Sprintf("Field %s is too long (maximum is %d characters)", field, d))
 	}
 }
 
@@ -48,7 +48,7 @@ func (f *Form) MinLength(field string, d int) {
 		return
 	}
 	if utf8.RuneCountInString(value) < d {
-		f.Errors.Add(field, fmt.Sprintf("This field is too short (minimum is %d characters)", d))
+		f.Errors.Add(field, fmt.Sprintf("Field %s is too short (minimum is %d characters)", field, d))
 	}
 }
 
@@ -62,14 +62,14 @@ func (f *Form) PermittedValues(field string, opts ...string) {
 			return
 		}
 	}
-	f.Errors.Add(field, "This field is invalid")
+	f.Errors.Add(field, fmt.Sprintf("Field %s is invalid", field))
 }
 
 func (f *Form) RestrictedValues(field string, opts ...string) {
 	value := f.Get(field)
 	for _, opt := range opts {
 		if value == opt {
-			f.Errors.Add(field, "This field is invalid")
+			f.Errors.Add(field, fmt.Sprintf("Field %s is invalid", field))
 			return
 		}
 	}
@@ -81,7 +81,7 @@ func (f *Form) MatchesPattern(field string, pattern *regexp.Regexp) {
 		return
 	}
 	if !pattern.MatchString(value) {
-		f.Errors.Add(field, "This field is invalid")
+		f.Errors.Add(field, fmt.Sprintf("Field %s is invalid", field))
 	}
 }
 
@@ -92,7 +92,7 @@ func (f *Form) ValidEmail(field string) {
 	}
 	_, err := mail.ParseAddress(value)
 	if err != nil {
-		f.Errors.Add(field, "This field is invalid")
+		f.Errors.Add(field, fmt.Sprintf("Field %s is invalid", field))
 	}
 }
 

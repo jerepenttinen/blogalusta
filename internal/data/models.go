@@ -6,8 +6,9 @@ import (
 )
 
 var (
-	ErrRecordNotFound = errors.New("record not found")
-	ErrEditConflict   = errors.New("edit conflict")
+	ErrRecordNotFound  = errors.New("record not found")
+	ErrDuplicateRecord = errors.New("duplicate record")
+	ErrEditConflict    = errors.New("edit conflict")
 )
 
 type Models struct {

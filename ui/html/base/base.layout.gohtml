@@ -25,7 +25,7 @@
                 <ul class='navbar-nav'>
                     {{if .AuthenticatedUser}}
                         {{block "nav" .}}
-                            {{template "newarticlebutton" .}}
+                            {{template "newarticleuser" .}}
                         {{end}}
                         <li class='nav-item dropdown'>
                             <a href='#' class='dropdown-toggle dropdown-toggle-remove' data-bs-toggle='dropdown'>
@@ -76,6 +76,11 @@
             </div>
         </nav>
     </header>
+    {{with .Flash}}
+        <div class='text-center alert alert-danger'>
+            {{.}}
+        </div>
+    {{end}}
     <section class='container-md'>
         {{template "body" .}}
     </section>

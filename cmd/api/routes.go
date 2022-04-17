@@ -46,10 +46,19 @@ func (app *application) routes() *chi.Mux {
 		r.With(app.addArticleToContext).Get("/{articleSlug:[a-z0-9-]+-[0-9]+}", app.handleShowArticlePage)
 		r.Route("/", func(r chi.Router) {
 			r.Use(app.requireAuthenticatedUser)
-			r.Get("/article", app.handleShowCreateArticlePage)
-			r.Post("/article", app.handleCreateArticle)
 			r.Post("/subscribe", app.handleSubscribe)
 			r.Post("/unsubscribe", app.handleUnsubscribe)
+			r.Route("/", func(r chi.Router) {
+				r.Use(app.requireUserIsWriter)
+				r.Get("/article", app.handleShowCreateArticlePage)
+				r.Post("/article", app.handleCreateArticle)
+				r.Route("/", func(r chi.Router) {
+					r.Use(app.requireUserIsOwner)
+					r.Get("/settings", app.handleShowPublicationSettingsPage)
+					r.Post("/invite", app.handleInviteWriter)
+					r.Post("/withdraw/{userID:[0-9]+}", app.handleWithdrawInvitation)
+				})
+			})
 		})
 	})
 

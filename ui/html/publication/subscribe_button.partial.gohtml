@@ -2,12 +2,12 @@
     <li class='nav-item'>
         {{if .IsSubscribed}}
             <form method='post' action='/{{$.Publication.URL}}/unsubscribe'>
-                {{template "csrf" .}}
+                {{template "csrf" $}}
                 <input type='submit' value='Subscribed' class='btn btn-light me-2'>
             </form>
         {{else}}
             <form method='post' action='/{{$.Publication.URL}}/subscribe'>
-                {{template "csrf" .}}
+                {{template "csrf" $}}
                 <input type='submit' value='Subscribe' class='btn btn-primary me-2'>
             </form>
         {{end}}

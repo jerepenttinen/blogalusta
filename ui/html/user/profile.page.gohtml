@@ -3,61 +3,63 @@
 {{define "title"}}{{.AuthenticatedUser.Name}}{{end}}
 
 {{define "body"}}
-    <h3 class='text-body'>{{.ProfileUser.Name}}</h3>
-    <img class='rounded-circle' src='{{userPic .ProfileUser}}' alt='Profile pic' width='128'>
+    <div class='container mb-5'>
+        <div class='row justify-content-between'>
+            <div class='col'>
+                <h3 class='text-body'>{{.ProfileUser.Name}}</h3>
+            </div>
+            <div class='col' style='max-width: max-content'>
+                <img class='rounded-circle' src='{{userPic .ProfileUser}}' alt='Profile pic' width='128'>
+            </div>
+        </div>
+    </div>
 
     {{with .Publications.WritesOn}}
-        <div class='mb-1'>
-            <b>Writes</b>
-        </div>
-        <div class='container mb-3'>
-            <div class='row row-cols-1'>
-                {{range .}}
-                    <section class='card border-0 rounded-0'>
-                        <div class='card-body'>
-                            <a href='/{{.URL}}'
-                               class='card-title fw-bold text-body text-truncate mr-auto stretched-link'>
-                                {{.Name}}
-                            </a>
-                            <p class='card-text text-truncate'>{{.Description}}</p>
-                            {{if eq .OwnerID $.AuthenticatedUser.ID}}
-                                <iframe name='hiddenFrame' width='0' height='0' style='display: none'></iframe>
-                                <form action='/user/publication/delete' method='post' target='hiddenFrame'
-                                      onsubmit='setTimeout(() => { window.location.reload() }, 50)'>
-                                    {{template "csrf" $}}
-                                    <input type='hidden' name='publication-id' value='{{.ID}}'>
-                                    <div class='position-relative d-inline-block'>
-                                        <button class='btn btn-danger btn-sm stretched-link' type='submit'>Delete
-                                        </button>
-                                    </div>
-                                </form>
-                            {{end}}
-                        </div>
-                    </section>
-                {{end}}
+        <div class='container'>
+            <div class='mb-1'>
+                <b>Writes</b>
+            </div>
+            <div class='container mb-3'>
+                <div class='row row-cols-1'>
+                    {{range .}}
+                        <section class='card border-0 rounded-0'>
+                            <div class='card-body'>
+                                <a href='/{{.URL}}'
+                                   class='card-title fw-bold text-body text-truncate mr-auto stretched-link'>
+                                    {{.Name}}
+                                </a>
+                                <p class='card-text text-truncate'>{{.Description}}</p>
+                            </div>
+                        </section>
+                    {{end}}
+                </div>
             </div>
         </div>
     {{end}}
 
     {{with .Publications.SubscribesTo}}
-        <div class='mb-1'>
-            <b>Subscribes</b>
-        </div>
-        <div class='container-fluid'>
-            <div class='row row-cols-3'>
-                {{range .}}
-                    <content class='col card mb-3 p-0'>
-                        <div class='card-body'>
-                            <a href='/{{.URL}}' class='card-title stretched-link'>
-                                <b class='text-body text-truncate'>{{.Name}}</b>
-                            </a>
-                        </div>
-                    </content>
-                {{end}}
+        <div class='container'>
+            <div class='mb-1'>
+                <b>Subscribes</b>
+            </div>
+            <div class='container-fluid'>
+                <div class='row row-cols-3'>
+                    {{range .}}
+                        <content class='col card mb-3 p-0'>
+                            <div class='card-body'>
+                                <a href='/{{.URL}}' class='card-title stretched-link'>
+                                    <b class='text-body text-truncate'>{{.Name}}</b>
+                                </a>
+                            </div>
+                        </content>
+                    {{end}}
+                </div>
             </div>
         </div>
     {{end}}
     {{if eq .AuthenticatedUser.ID .ProfileUser.ID}}
-        <p><a href='/user/publication/create'>Create a new publication</a></p>
+        <div class='container'>
+            <p><a href='/user/publication/create'>Create a new publication</a></p>
+        </div>
     {{end}}
 {{end}}

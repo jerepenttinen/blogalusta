@@ -14,10 +14,12 @@ import (
 type templateData struct {
 	AuthenticatedUser *data.User
 	CSRFToken         string
+	Flash             string
 	CurrentYear       int
 	Form              *forms.Form
 	Publication       *data.Publication
 	Publications      *data.Publications
+	Pending           []*data.User
 	IsWriter          bool
 	IsSubscribed      bool
 	Writers           []*data.User

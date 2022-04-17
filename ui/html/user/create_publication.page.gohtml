@@ -8,15 +8,9 @@
         {{template "csrf" $}}
         {{with .Form}}
             <div class='input-group mb-4'>
-                {{with .Errors.Get "name"}}
-                    <label class='error'>{{.}}</label>
-                {{end}}
                 <input class='form-control' placeholder='Name' type='text' name='name' id='name-input' value='{{.Get "name"}}' minlength='4' maxlength='24' required>
             </div>
             <div class='input-group mb-4'>
-                {{with .Errors.Get "description"}}
-                    <label class='error'>{{.}}</label>
-                {{end}}
                 <textarea class='form-control' placeholder='Description' name='description' id='description-input' cols='30' rows='10' required>{{.Get "description"}}</textarea>
             </div>
             <input type='submit' value='Create' class='mb-4 btn btn-primary'>

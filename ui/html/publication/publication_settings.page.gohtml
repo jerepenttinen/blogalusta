@@ -1,0 +1,115 @@
+{{template "base" .}}
+
+{{define "title"}}Settings {{.Publication.Name}}{{end}}
+
+{{define "nav"}}
+    {{if userIn .AuthenticatedUser .Writers}}
+        {{template "newarticlepublication" $}}
+    {{else}}
+        {{template "subscribebutton" $}}
+    {{end}}
+{{end}}
+
+{{define "body"}}
+    <ul class='nav justify-content-center'>
+        <li class='nav-item'>
+            <a href='/{{.Publication.URL}}' class='nav-link'>
+                Articles
+            </a>
+        </li>
+        <li class='nav-item'>
+            <a href='/{{.Publication.URL}}/about' class='nav-link'>
+                About
+            </a>
+        </li>
+        {{if .AuthenticatedUser}}
+            {{if eq .AuthenticatedUser.ID .Publication.OwnerID}}
+                <li class='nav-item'>
+                    <a href='/{{.Publication.URL}}/settings' class='nav-link active'>
+                        Settings
+                    </a>
+                </li>
+            {{end}}
+        {{end}}
+    </ul>
+    {{with .Publication}}
+        <section class='container mb-3'>
+            <b>Description</b>
+            <p>{{.Description}}</p>
+        </section>
+    {{end}}
+    <div class='container mb-3'>
+        <b class='mb-3'>Writers</b>
+        <div class='row row-cols-2 gap-3 mt-3'>
+            {{range .Writers}}
+                {{if ne .ID $.Publication.OwnerID}}
+                    <section class='col card border-0' style='margin: -0.25em -0.25em'>
+                        <div class='card-body'>
+                            <img class='rounded-circle me-4' src='{{userPic .}}'
+                                 alt='Profile pic' width='92'>
+                            <a href='{{userURL .}}' class='card-title stretched-link'>
+                                <b class='text-body text-truncate'>{{.Name}}</b>
+                            </a>
+                            <form class='mb-3 d-inline-block' action='/{{$.Publication.URL}}/kick/{{.ID}}'
+                                  method='post'>
+                                {{template "csrf" $}}
+                                <div class='position-relative d-inline-block'>
+                                    <button class='btn btn-danger btn-sm stretched-link' type='submit'>
+                                        Kick
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                {{end}}
+            {{end}}
+        </div>
+    </div>
+
+    <div class='container'>
+        <b class='mb-3'>Invite a new writer</b>
+        <form class='mb-3' action='/{{.Publication.URL}}/invite' method='post'>
+            {{template "csrf" $}}
+            <input class='form-control mb-3' type='email' name='email' id='email-input' placeholder='Email'
+                   required>
+            <input type='submit' value='Invite' class='btn btn-primary'>
+        </form>
+    </div>
+
+    {{if .Pending}}
+        <div class='container mb-3'>
+            <b class='mb-3'>Pending</b>
+            {{range .Pending}}
+                <div class='row gap-3'>
+                    <section class='col card border-0'>
+                        <div class='card-body '>
+                            <img class='rounded-circle me-4' src='{{userPic .}}'
+                                 alt='Profile pic' width='92'>
+                            <a href='{{userURL .}}' class='card-title stretched-link'>
+                                <b class='text-body text-truncate'>{{.Name}}</b>
+                            </a>
+                            <form class='mb-3 d-inline-block' action='/{{$.Publication.URL}}/withdraw/{{.ID}}'
+                                  method='post'>
+                                {{template "csrf" $}}
+                                <div class='position-relative d-inline-block'>
+                                    <button class='btn btn-danger btn-sm stretched-link' type='submit'>
+                                        Withdraw
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </section>
+                </div>
+            {{end}}
+        </div>
+    {{end}}
+
+    <div class='container'>
+        <form action='/{{.Publication.ID}}/delete' method='post'>
+            {{template "csrf" $}}
+            <button class='btn btn-danger' type='submit'>
+                Delete
+            </button>
+        </form>
+    </div>
+{{end}}

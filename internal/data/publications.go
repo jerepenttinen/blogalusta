@@ -3,13 +3,9 @@ package data
 import (
 	"context"
 	"database/sql"
-	"errors"
+	"fmt"
 	"github.com/gosimple/slug"
 	"time"
-)
-
-var (
-	ErrDuplicateUrl = errors.New("duplicate url")
 )
 
 type Publication struct {
@@ -20,6 +16,22 @@ type Publication struct {
 	OwnerID     int64
 	CreatedAt   time.Time
 	Version     int
+}
+
+func (p *Publication) GetBaseURL() string {
+	return fmt.Sprintf("/%s", p.URL)
+}
+
+func (p *Publication) GetSettingsURL() string {
+	return fmt.Sprintf("/%s/settings", p.URL)
+}
+
+func (p *Publication) GetAboutURL() string {
+	return fmt.Sprintf("/%s/about", p.URL)
+}
+
+func (p *Publication) GetArticleURL(article *Article) string {
+	return fmt.Sprintf("/%s/%s", p.URL, article.URL)
 }
 
 type Publications struct {
@@ -172,7 +184,7 @@ func (m *PublicationModel) Insert(userID int64, name, description string) (strin
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "publication_url_key"`:
-			return "", ErrDuplicateUrl
+			return "", ErrDuplicateRecord
 		default:
 			return "", err
 		}
@@ -229,4 +241,40 @@ func (m *PublicationModel) UserIsSubscribed(publication *Publication, user *User
 	}
 
 	return exists == 1, nil
+}
+
+func (m *PublicationModel) Invite(publication *Publication, user *User) error {
+	query := `
+		INSERT INTO invitation (user_id, publication_id)
+		VALUES ($1, $2)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, user.ID, publication.ID)
+	if err.Error() == `pq: duplicate key value violates unique constraint "invitation_pk"` {
+		return ErrDuplicateRecord
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *PublicationModel) Withdraw(publication *Publication, id int) error {
+	query := `
+		DELETE FROM invitation
+		WHERE user_id = $1 AND publication_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, id, publication.ID)
+	if err == sql.ErrNoRows {
+		return ErrRecordNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
 }
