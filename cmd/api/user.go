@@ -5,6 +5,7 @@ import (
 	"blogalusta/internal/forms"
 	"bytes"
 	"errors"
+	"github.com/go-chi/chi/v5"
 	"image"
 	"image/jpeg"
 	_ "image/png"
@@ -166,7 +167,7 @@ func (app *application) handleDeletePublication(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	err = app.models.Publications.DeleteByID(user.ID, int64(publicationID))
+	err = app.models.Publications.Delete(user.ID, int64(publicationID))
 	if err != nil {
 		app.clientError(w, http.StatusMethodNotAllowed)
 		return
@@ -261,6 +262,95 @@ func (app *application) handleChangeUserProfilePicture(w http.ResponseWriter, r 
 		return
 	}
 
-	w.Header().Set("Refresh", "0")
 	w.WriteHeader(http.StatusCreated)
+}
+
+func (app *application) handleShowUserInvitationsPage(w http.ResponseWriter, r *http.Request) {
+	invitations, err := app.models.Users.Invitations(app.authenticatedUser(r))
+	if err == data.ErrRecordNotFound {
+		// do nothing
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "user_invitations.page.gohtml", &templateData{
+		InvitingPublications: invitations,
+	})
+}
+
+func (app *application) handleAcceptInvitation(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		app.clientError(w, http.StatusNotFound)
+		return
+	}
+
+	err = app.models.Users.AcceptInvitation(app.authenticatedUser(r), id)
+	if err != nil {
+		switch err {
+		case data.ErrRecordNotFound:
+			app.session.Put(r, "flash", "Invalid invitation")
+			http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
+			return
+		case data.ErrDuplicateRecord:
+			app.session.Put(r, "flash", "You're already writer in that publication")
+			http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
+			return
+		}
+
+		app.serverError(w, err)
+		return
+	}
+
+	app.session.Put(r, "flash", "Accepted invite")
+	http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
+}
+
+func (app *application) handleDeclineInvitation(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		app.clientError(w, http.StatusNotFound)
+		return
+	}
+
+	err = app.models.Users.DeclineInvitation(app.authenticatedUser(r), id)
+	if err != nil {
+		switch err {
+		case data.ErrRecordNotFound:
+			app.session.Put(r, "flash", "Invalid invitation")
+			http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
+			return
+		}
+
+		app.serverError(w, err)
+		return
+	}
+
+	app.session.Put(r, "flash", "Declined invite")
+	http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
+}
+
+func (app *application) handleLeavePublication(w http.ResponseWriter, r *http.Request) {
+	publicationID, err := strconv.Atoi(chi.URLParam(r, "id"))
+	if err != nil {
+		app.clientError(w, http.StatusNotFound)
+		return
+	}
+
+	err = app.models.Users.Leave(app.authenticatedUser(r), publicationID)
+	if err != nil {
+		switch err {
+		case data.ErrRecordNotFound:
+			app.session.Put(r, "flash", "Invalid publication")
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		app.serverError(w, err)
+		return
+	}
+
+	app.session.Put(r, "flash", "Left the publication")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

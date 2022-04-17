@@ -182,37 +182,6 @@ func (m *UserModel) UnsubscribeFrom(user *User, publication *Publication) error 
 	return nil
 }
 
-func (m *UserModel) GetPendingInvitations(publication *Publication) ([]*User, error) {
-
-	stmt := `
-		SELECT id, name, email, created_at, image_id
-		FROM invitation
-		JOIN users on id = invitation.user_id
-		WHERE publication_id = $1`
-
-	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	defer cancel()
-
-	var users []*User
-	rows, err := m.DB.QueryContext(ctx, stmt, publication.ID)
-	for rows.Next() {
-		u := &User{}
-		err = rows.Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt, &u.ImageID)
-		if err != nil {
-			return nil, err
-		}
-		users = append(users, u)
-	}
-
-	if err == sql.ErrNoRows {
-		return nil, ErrRecordNotFound
-	} else if err != nil {
-		return nil, err
-	}
-
-	return users, nil
-}
-
 func (m *UserModel) GetByEmail(email string) (*User, error) {
 	s := &User{}
 
@@ -230,4 +199,111 @@ func (m *UserModel) GetByEmail(email string) (*User, error) {
 	}
 
 	return s, nil
+}
+
+func (m *UserModel) Invitations(user *User) ([]*Publication, error) {
+
+	stmt := `
+		SELECT id, name, url, description, owner_id, created_at
+		FROM invitation
+		JOIN publication on id = invitation.publication_id
+		WHERE user_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var publications []*Publication
+	rows, err := m.DB.QueryContext(ctx, stmt, user.ID)
+	for rows.Next() {
+		p := &Publication{}
+		err = rows.Scan(&p.ID, &p.Name, &p.URL, &p.Description, &p.OwnerID, &p.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		publications = append(publications, p)
+	}
+
+	if err == sql.ErrNoRows {
+		return nil, ErrRecordNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	return publications, nil
+}
+
+func (m *UserModel) AcceptInvitation(user *User, publicationID int) error {
+	stmt := `
+		DELETE 
+		FROM invitation
+		WHERE user_id = $1 AND publication_id = $2`
+
+	ctx0, cancel0 := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel0()
+
+	_, err := m.DB.ExecContext(ctx0, stmt, user.ID, publicationID)
+
+	if err == sql.ErrNoRows {
+		return ErrRecordNotFound
+	} else if err != nil {
+		return err
+	}
+
+	stmt = `
+		INSERT INTO writes_on (user_id, publication_id)
+		VALUES ($1, $2)`
+
+	ctx1, cancel1 := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel1()
+
+	_, err = m.DB.ExecContext(ctx1, stmt, user.ID, publicationID)
+
+	if err != nil {
+		if err.Error() == `pq: duplicate key value violates unique constraint "writes_on_pk"` {
+			return ErrDuplicateRecord
+		}
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserModel) DeclineInvitation(user *User, publicationID int) error {
+	stmt := `
+		DELETE 
+		FROM invitation
+		WHERE user_id = $1 AND publication_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, stmt, user.ID, publicationID)
+
+	if err == sql.ErrNoRows {
+		return ErrRecordNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserModel) Leave(user *User, publicationID int) error {
+	stmt := `
+		DELETE 
+		FROM writes_on
+		WHERE user_id = $1 AND publication_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, stmt, user.ID, publicationID)
+
+	if err == sql.ErrNoRows {
+		return ErrRecordNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
 }

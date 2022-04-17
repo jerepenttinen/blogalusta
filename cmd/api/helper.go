@@ -59,7 +59,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.ProfileUser = app.profileUser(r)
 	td.Writers = app.writers(r)
 	td.IsSubscribed, _ = app.models.Publications.UserIsSubscribed(td.Publication, td.AuthenticatedUser)
-	td.Pending = app.pending(r)
+	td.InvitedWriters = app.pending(r)
 	return td
 }
 

@@ -40,30 +40,34 @@
     {{end}}
     <div class='container mb-3'>
         <b class='mb-3'>Writers</b>
-        <div class='row row-cols-2 gap-3 mt-3'>
-            {{range .Writers}}
-                {{if ne .ID $.Publication.OwnerID}}
-                    <section class='col card border-0' style='margin: -0.25em -0.25em'>
-                        <div class='card-body'>
-                            <img class='rounded-circle me-4' src='{{userPic .}}'
-                                 alt='Profile pic' width='92'>
-                            <a href='{{userURL .}}' class='card-title stretched-link'>
-                                <b class='text-body text-truncate'>{{.Name}}</b>
-                            </a>
-                            <form class='mb-3 d-inline-block' action='/{{$.Publication.URL}}/kick/{{.ID}}'
-                                  method='post'>
-                                {{template "csrf" $}}
-                                <div class='position-relative d-inline-block'>
-                                    <button class='btn btn-danger btn-sm stretched-link' type='submit'>
-                                        Kick
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-                    </section>
+        {{with .Writers}}
+            <div class='row row-cols-2 gap-3 mt-3'>
+                {{range .}}
+                    {{if ne .ID $.Publication.OwnerID}}
+                        <section class='col card border-0' style='margin: -0.25em -0.25em'>
+                            <div class='card-body'>
+                                <img class='rounded-circle me-4' src='{{userPic .}}'
+                                     alt='Profile pic' width='92'>
+                                <a href='{{userURL .}}' class='card-title stretched-link'>
+                                    <b class='text-body text-truncate'>{{.Name}}</b>
+                                </a>
+                                <form class='mb-3 d-inline-block' action='/{{$.Publication.URL}}/kick/{{.ID}}'
+                                      method='post'>
+                                    {{template "csrf" $}}
+                                    <div class='position-relative d-inline-block'>
+                                        <button class='btn btn-danger btn-sm stretched-link' type='submit'>
+                                            Kick
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </section>
+                    {{end}}
                 {{end}}
-            {{end}}
-        </div>
+            </div>
+        {{else}}
+            <small class='muted'>No writers</small>
+        {{end}}
     </div>
 
     <div class='container'>
@@ -76,10 +80,10 @@
         </form>
     </div>
 
-    {{if .Pending}}
+    {{if .InvitedWriters}}
         <div class='container mb-3'>
-            <b class='mb-3'>Pending</b>
-            {{range .Pending}}
+            <b class='mb-3'>Pending invitations</b>
+            {{range .InvitedWriters}}
                 <div class='row gap-3'>
                     <section class='col card border-0'>
                         <div class='card-body '>

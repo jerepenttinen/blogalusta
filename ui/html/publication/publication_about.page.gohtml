@@ -58,4 +58,26 @@
             {{end}}
         </div>
     </div>
+
+    {{with .Publication}}
+        <section class='container mb-3'>
+            <b>Established</b>
+            <div title='{{rfc3339 .CreatedAt}}' style='display: block; cursor: pointer'>
+                <time datetime='{{rfc3339 .CreatedAt}}'>{{humanDate .CreatedAt}}</time>
+            </div>
+        </section>
+    {{end}}
+    {{if .AuthenticatedUser}}
+        {{if and .IsWriter (ne .AuthenticatedUser.ID .Publication.OwnerID)}}
+            <section class='container'>
+                <form class='mb-3' action='/user/publication/{{.Publication.ID}}/leave'
+                      method='post'>
+                    {{template "csrf" $}}
+                    <button class='btn btn-danger btn-sm' type='submit'>
+                        Leave
+                    </button>
+                </form>
+            </section>
+        {{end}}
+    {{end}}
 {{end}}

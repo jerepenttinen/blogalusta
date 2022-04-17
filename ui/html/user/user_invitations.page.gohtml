@@ -1,0 +1,49 @@
+{{template "base" .}}
+
+{{define "title"}}User settings{{end}}
+
+{{define "body"}}
+    <div class='container mb-3'>
+        <b class='mb-3'>Pending</b>
+        {{with .InvitingPublications}}
+            {{range .}}
+                <div class='row mb-3 justify-content-between'>
+                    <section class='col card border-0'>
+                        <div class='card-body row'>
+                            <div class='col align-top'>
+                                <a href='{{.GetBaseURL}}' class='card-title stretched-link'>
+                                    <b class='text-body text-truncate'>{{.Name}}</b>
+                                </a>
+                                <p class='text-truncate'>
+                                    {{.Description}}
+                                </p>
+                            </div>
+                            <div class='col' style='max-width: max-content'>
+                                <form class='d-inline-block' action='/user/invitations/{{.ID}}/accept'
+                                      method='post'>
+                                    {{template "csrf" $}}
+                                    <div class='position-relative d-inline-block'>
+                                        <button class='btn btn-success btn-sm stretched-link' type='submit'>
+                                            Accept
+                                        </button>
+                                    </div>
+                                </form>
+                                <form class='d-inline-block' action='/user/invitations/{{.ID}}/decline'
+                                      method='post'>
+                                    {{template "csrf" $}}
+                                    <div class='position-relative d-inline-block'>
+                                        <button class='btn btn-danger btn-sm stretched-link' type='submit'>
+                                            Decline
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            {{end}}
+        {{else}}
+            <p>No pending invites</p>
+        {{end}}
+    </div>
+{{end}}

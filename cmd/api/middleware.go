@@ -105,7 +105,7 @@ func (app *application) addPublicationToContext(next http.Handler) http.Handler 
 			return
 		}
 
-		pending, err := app.models.Users.GetPendingInvitations(publication)
+		pending, err := app.models.Publications.Invitations(publication)
 		if err != nil {
 			app.serverError(w, err)
 			return

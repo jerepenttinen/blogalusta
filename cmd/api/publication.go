@@ -68,7 +68,14 @@ func (app *application) handleCreateArticle(w http.ResponseWriter, r *http.Reque
 }
 
 func (app *application) handleShowPublicationAboutPage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "publication_about.page.gohtml", nil)
+	isWriter, err := app.models.Publications.UserIsWriter(app.publication(r), app.authenticatedUser(r))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	app.render(w, r, "publication_about.page.gohtml", &templateData{
+		IsWriter: isWriter,
+	})
 }
 
 func (app *application) handleShowPublicationSettingsPage(w http.ResponseWriter, r *http.Request) {

@@ -152,7 +152,7 @@ func (m *PublicationModel) GetUsersPublications(userID int64) (*Publications, er
 	return ps, nil
 }
 
-func (m *PublicationModel) DeleteByID(userID, publicationID int64) error {
+func (m *PublicationModel) Delete(userID, publicationID int64) error {
 	query := `
 		DELETE
 		FROM publication p
@@ -252,9 +252,10 @@ func (m *PublicationModel) Invite(publication *Publication, user *User) error {
 	defer cancel()
 
 	_, err := m.DB.ExecContext(ctx, query, user.ID, publication.ID)
-	if err.Error() == `pq: duplicate key value violates unique constraint "invitation_pk"` {
-		return ErrDuplicateRecord
-	} else if err != nil {
+	if err != nil {
+		if err.Error() == `pq: duplicate key value violates unique constraint "invitation_pk"` {
+			return ErrDuplicateRecord
+		}
 		return err
 	}
 
@@ -277,4 +278,35 @@ func (m *PublicationModel) Withdraw(publication *Publication, id int) error {
 	}
 
 	return nil
+}
+
+func (m *PublicationModel) Invitations(publication *Publication) ([]*User, error) {
+
+	stmt := `
+		SELECT id, name, email, created_at, image_id
+		FROM invitation
+		JOIN users on id = invitation.user_id
+		WHERE publication_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var users []*User
+	rows, err := m.DB.QueryContext(ctx, stmt, publication.ID)
+	for rows.Next() {
+		u := &User{}
+		err = rows.Scan(&u.ID, &u.Name, &u.Email, &u.CreatedAt, &u.ImageID)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	if err == sql.ErrNoRows {
+		return nil, ErrRecordNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }

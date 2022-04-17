@@ -12,21 +12,24 @@ import (
 )
 
 type templateData struct {
-	AuthenticatedUser *data.User
-	CSRFToken         string
-	Flash             string
-	CurrentYear       int
-	Form              *forms.Form
-	Publication       *data.Publication
-	Publications      *data.Publications
-	Pending           []*data.User
-	IsWriter          bool
-	IsSubscribed      bool
-	Writers           []*data.User
-	Article           *data.Article
-	Articles          []*data.Article
-	HTML              template.HTML
-	ProfileUser       *data.User
+	CSRFToken   string
+	Flash       string
+	CurrentYear int
+	Form        *forms.Form
+
+	AuthenticatedUser    *data.User
+	ProfileUser          *data.User
+	Publications         *data.Publications
+	InvitingPublications []*data.Publication
+
+	Publication    *data.Publication
+	Writers        []*data.User
+	InvitedWriters []*data.User
+	IsWriter       bool
+	IsSubscribed   bool
+	Article        *data.Article
+	Articles       []*data.Article
+	HTML           template.HTML
 }
 
 func humanDate(t time.Time) string {
