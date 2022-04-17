@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/gosimple/slug"
 	"html/template"
+	"io/fs"
 	"path/filepath"
 	"time"
 )
@@ -88,7 +89,17 @@ var functions = template.FuncMap{
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	cache := map[string]*template.Template{}
 
-	pages, err := filepath.Glob(filepath.Join(dir, "*.page.gohtml"))
+	pages, err := glob(dir, "*.page.gohtml")
+	if err != nil {
+		return nil, err
+	}
+
+	layouts, err := glob(dir, "*.layout.gohtml")
+	if err != nil {
+		return nil, err
+	}
+
+	partials, err := glob(dir, "*.partial.gohtml")
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +107,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	for _, page := range pages {
 		name := filepath.Base(page)
 
-		ts, err := template.New(name).Funcs(functions).ParseGlob(filepath.Join(dir, "*.layout.gohtml"))
+		ts, err := template.New(name).Funcs(functions).ParseFiles(layouts...)
 		if err != nil {
 			return nil, err
 		}
@@ -106,7 +117,7 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 			return nil, err
 		}
 
-		ts, err = ts.ParseGlob(filepath.Join(dir, "*.partial.gohtml"))
+		ts, err = ts.ParseFiles(partials...)
 		if err != nil {
 			return nil, err
 		}
@@ -115,4 +126,25 @@ func newTemplateCache(dir string) (map[string]*template.Template, error) {
 	}
 
 	return cache, nil
+}
+
+func glob(dir string, fileMatch string) ([]string, error) {
+	var files []string
+	err := filepath.Walk(dir, func(path string, info fs.FileInfo, err error) error {
+		name := filepath.Base(path)
+		ok, err := filepath.Match(fileMatch, name)
+		if err != nil {
+			return err
+		}
+		if ok {
+			files = append(files, path)
+		}
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return files, nil
 }
