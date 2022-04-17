@@ -262,7 +262,7 @@ func (m *PublicationModel) Invite(publication *Publication, user *User) error {
 	return nil
 }
 
-func (m *PublicationModel) Withdraw(publication *Publication, id int) error {
+func (m *PublicationModel) Withdraw(publication *Publication, userID int) error {
 	query := `
 		DELETE FROM invitation
 		WHERE user_id = $1 AND publication_id = $2`
@@ -270,7 +270,7 @@ func (m *PublicationModel) Withdraw(publication *Publication, id int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := m.DB.ExecContext(ctx, query, id, publication.ID)
+	_, err := m.DB.ExecContext(ctx, query, userID, publication.ID)
 	if err == sql.ErrNoRows {
 		return ErrRecordNotFound
 	} else if err != nil {
@@ -309,4 +309,54 @@ func (m *PublicationModel) Invitations(publication *Publication) ([]*User, error
 	}
 
 	return users, nil
+}
+
+func (m *PublicationModel) Kick(publication *Publication, userID int) error {
+	query := `
+		DELETE FROM writes_on
+		WHERE user_id = $1 AND publication_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, userID, publication.ID)
+	if err == sql.ErrNoRows {
+		return ErrRecordNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *PublicationModel) GetArticlePublications(articles []*Article) (map[int]*Publication, error) {
+	query := `
+		SELECT id, name, url, description, owner_id, created_at, version
+		FROM publication
+		WHERE id = $1`
+
+	pubs := make(map[int]*Publication)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	defer cancel()
+
+	for _, article := range articles {
+		if _, ok := pubs[int(article.PublicationID)]; ok {
+			continue
+		}
+		row := m.DB.QueryRowContext(ctx, query, article.PublicationID)
+
+		p := &Publication{}
+		err := row.Scan(&p.ID, &p.Name, &p.URL, &p.Description, &p.OwnerID, &p.CreatedAt, &p.Version)
+
+		if err == sql.ErrNoRows {
+			return nil, ErrRecordNotFound
+		} else if err != nil {
+			return nil, err
+		}
+
+		pubs[int(p.ID)] = p
+	}
+
+	return pubs, nil
 }

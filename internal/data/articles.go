@@ -105,3 +105,42 @@ func (m *ArticleModel) GetArticlesOfPublication(publication *Publication) ([]*Ar
 
 	return articles, nil
 }
+
+func (m *ArticleModel) GetNewestArticles(filters Filters) ([]*Article, Metadata, error) {
+	query := `
+		SELECT count(*) OVER(), id, title, content, publication_id, writer_id, created_at, version
+		FROM article
+		ORDER BY created_at DESC
+		LIMIT $1 OFFSET $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, filters.limit(), filters.offset())
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+	defer rows.Close()
+
+	totalRecords := 0
+	var articles []*Article
+
+	for rows.Next() {
+		a := &Article{}
+		err = rows.Scan(&totalRecords, &a.ID, &a.Title, &a.Content, &a.PublicationID, &a.WriterID, &a.CreatedAt, &a.Version)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+		a.SetURL()
+
+		articles = append(articles, a)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metaData := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return articles, metaData, nil
+}

@@ -30,6 +30,10 @@ type templateData struct {
 	Article        *data.Article
 	Articles       []*data.Article
 	HTML           template.HTML
+
+	Metadata  data.Metadata
+	PubMap    map[int]*data.Publication
+	WriterMap map[int]*data.User
 }
 
 func humanDate(t time.Time) string {
@@ -83,12 +87,27 @@ func userIn(user *data.User, users []*data.User) bool {
 	return false
 }
 
+func add(a, b int) int {
+	return a + b
+}
+
+func seq(first, last int) []int {
+	count := last - first
+	result := make([]int, 0, count)
+	for i := 0; i <= count; i++ {
+		result = append(result, first+i)
+	}
+	return result
+}
+
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"rfc3339":   rfc3339,
 	"userURL":   userURL,
 	"userPic":   userPic,
 	"userIn":    userIn,
+	"add":       add,
+	"seq":       seq,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

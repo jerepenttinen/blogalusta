@@ -263,6 +263,7 @@ func (app *application) handleChangeUserProfilePicture(w http.ResponseWriter, r 
 	}
 
 	w.WriteHeader(http.StatusCreated)
+	http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
 }
 
 func (app *application) handleShowUserInvitationsPage(w http.ResponseWriter, r *http.Request) {

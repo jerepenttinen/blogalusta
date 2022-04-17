@@ -31,7 +31,6 @@ func (app *application) routes() *chi.Mux {
 			r.Post("/logout", app.handleLogout)
 			r.Get("/publication/create", app.handleShowCreatePublicationPage)
 			r.Post("/publication/create", app.handleCreatePublication)
-			// r.Post("/publication/delete", app.handleDeletePublication)
 			r.Post("/publication/{id:[0-9]+}/leave", app.handleLeavePublication)
 			r.Get("/article", app.handleShowChoosePublicationPage)
 			r.Get("/settings", app.handleShowUserSettingsPage)
@@ -47,7 +46,6 @@ func (app *application) routes() *chi.Mux {
 		r.Use(dynamic...)
 		r.Get("/", app.handleShowPublicationPage)
 		r.Get("/about", app.handleShowPublicationAboutPage)
-		r.With(app.addArticleToContext).Get("/{articleSlug:[a-z0-9-]+-[0-9]+}", app.handleShowArticlePage)
 		r.Route("/", func(r chi.Router) {
 			r.Use(app.requireAuthenticatedUser)
 			r.Post("/subscribe", app.handleSubscribe)
@@ -61,8 +59,13 @@ func (app *application) routes() *chi.Mux {
 					r.Get("/settings", app.handleShowPublicationSettingsPage)
 					r.Post("/invite", app.handleInviteWriter)
 					r.Post("/withdraw/{userID:[0-9]+}", app.handleWithdrawInvitation)
+					r.Post("/kick/{userID:[0-9]+}", app.handleKickWriter)
 				})
 			})
+		})
+		r.Route("/{articleSlug:[a-z0-9-]+-[0-9]+}", func(r chi.Router) {
+			r.Use(app.addArticleToContext)
+			r.Get("/", app.handleShowArticlePage)
 		})
 	})
 

@@ -307,3 +307,30 @@ func (m *UserModel) Leave(user *User, publicationID int) error {
 
 	return nil
 }
+
+func (m *UserModel) GetArticleWriters(articles []*Article) (map[int]*User, error) {
+	query := `SELECT id, name, email, created_at, image_id FROM users WHERE id = $1`
+	users := make(map[int]*User)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	defer cancel()
+
+	for _, article := range articles {
+		if _, ok := users[int(article.WriterID)]; ok {
+			continue
+		}
+
+		s := &User{}
+		err := m.DB.QueryRowContext(ctx, query, article.WriterID).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt, &s.ImageID)
+
+		if err == sql.ErrNoRows {
+			return nil, ErrRecordNotFound
+		} else if err != nil {
+			return nil, err
+		}
+
+		users[int(s.ID)] = s
+	}
+
+	return users, nil
+}

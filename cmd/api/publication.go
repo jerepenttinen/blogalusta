@@ -128,13 +128,7 @@ func (app *application) handleUnsubscribe(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) handleInviteWriter(w http.ResponseWriter, r *http.Request) {
-	user := app.authenticatedUser(r)
 	publication := app.publication(r)
-
-	if user.ID != publication.OwnerID {
-		app.clientError(w, http.StatusUnauthorized)
-		return
-	}
 
 	err := r.ParseForm()
 	if err != nil {
@@ -185,13 +179,7 @@ func (app *application) handleInviteWriter(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) handleWithdrawInvitation(w http.ResponseWriter, r *http.Request) {
-	user := app.authenticatedUser(r)
 	publication := app.publication(r)
-
-	if user.ID != publication.OwnerID {
-		app.clientError(w, http.StatusUnauthorized)
-		return
-	}
 
 	id, err := strconv.Atoi(chi.URLParam(r, "userID"))
 	if err != nil {
@@ -208,5 +196,28 @@ func (app *application) handleWithdrawInvitation(w http.ResponseWriter, r *http.
 		return
 	}
 
+	app.session.Put(r, "flash", "Invitation withdrawn")
+	http.Redirect(w, r, publication.GetSettingsURL(), http.StatusSeeOther)
+}
+
+func (app *application) handleKickWriter(w http.ResponseWriter, r *http.Request) {
+	publication := app.publication(r)
+
+	id, err := strconv.Atoi(chi.URLParam(r, "userID"))
+	if err != nil {
+		app.clientError(w, http.StatusNotFound)
+		return
+	}
+
+	err = app.models.Publications.Kick(publication, id)
+	if err == data.ErrRecordNotFound {
+		app.clientError(w, http.StatusNotFound)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.session.Put(r, "flash", "Writer kicked from publication")
 	http.Redirect(w, r, publication.GetSettingsURL(), http.StatusSeeOther)
 }

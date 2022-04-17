@@ -1,0 +1,45 @@
+{{define "pager"}}
+    {{$metadata := .}}
+    <nav>
+        <ul class="pagination">
+            {{if eq $metadata.CurrentPage $metadata.FirstPage}}
+                <li class="page-item disabled">
+                    <a class="page-link" href="?p={{add $metadata.CurrentPage -1}}">
+                        <span>&laquo;</span>
+                    </a>
+                </li>
+            {{else}}
+                <li class="page-item">
+                    <a class="page-link" href="?p={{add $metadata.CurrentPage -1}}">
+                        <span>&laquo;</span>
+                    </a>
+                </li>
+            {{end}}
+            {{$currentpage := $metadata.CurrentPage}}
+
+            {{range $num := (seq (add $currentpage -2) (add $currentpage 2))}}
+                {{if and (gt $num (add $metadata.FirstPage -1)) (lt $num (add $metadata.LastPage 1))}}
+                    {{if eq $num $metadata.CurrentPage}}
+                        <li class="page-item active"><a class="page-link" href="?p={{$num}}">{{$num}}</a></li>
+                    {{else}}
+                        <li class="page-item"><a class="page-link" href="?p={{$num}}">{{$num}}</a></li>
+                    {{end}}
+                {{end}}
+            {{end}}
+
+            {{if eq $metadata.CurrentPage $metadata.LastPage}}
+                <li class="page-item disabled">
+                    <a class="page-link" href="?p={{add $metadata.CurrentPage 1}}">
+                        <span>&raquo;</span>
+                    </a>
+                </li>
+            {{else}}
+                <li class="page-item">
+                    <a class="page-link" href="?p={{add $metadata.CurrentPage 1}}">
+                        <span>&raquo;</span>
+                    </a>
+                </li>
+            {{end}}
+        </ul>
+    </nav>
+{{end}}

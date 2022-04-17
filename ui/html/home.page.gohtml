@@ -3,5 +3,29 @@
 {{define "title"}}Home{{end}}
 
 {{define "body"}}
-    <h1>Hello</h1>
+    {{if .Articles}}
+        <h3>Newest articles</h3>
+        {{range $article := .Articles}}
+            <section class='card border-0 rounded-0 pt-2 pb-2'>
+                <div class='card-body'>
+                    {{$publication := (index $.PubMap $article.PublicationID)}}
+                    {{$writer := (index $.WriterMap $article.WriterID)}}
+                    <a class='card-title fw-bold text-body stretched-link mb-1'
+                       href='/{{$publication.URL}}/{{$article.URL}}'>{{$article.Title}}</a><br>
+                    <div class='card-text position-relative d-inline-block'>
+                        <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic' width='32'>
+                        <a href='{{userURL $writer}}' class='stretched-link'>
+                            {{$writer.Name}}
+                        </a>
+                    </div>
+                    <div title='{{rfc3339 $article.CreatedAt}}' class='card-text position-relative d-inline-block'>
+                        <time datetime='{{rfc3339 $article.CreatedAt}}' class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
+                    </div>
+                </div>
+            </section>
+        {{end}}
+        {{template "pager" .Metadata}}
+    {{else}}
+        <h1>Coming soon</h1>
+    {{end}}
 {{end}}

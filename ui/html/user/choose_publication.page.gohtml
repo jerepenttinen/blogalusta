@@ -7,7 +7,7 @@
     {{if .Publications.WritesOn}}
         <div class='list-group'>
             {{range .Publications.WritesOn}}
-                <a class='list-group-item list-group-item-action' href='/{{.URL}}/article'>{{.Name}}</a>
+                <a class='list-group-item list-group-item-action py-3 fw-bold' href='/{{.URL}}/article'>{{.Name}}</a>
             {{end}}
         </div>
     {{else}}

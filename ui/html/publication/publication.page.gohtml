@@ -36,10 +36,11 @@
         {{range .Articles}}
             <section class='card border-0 rounded-0 pt-2 pb-2'>
                 <div class='card-body'>
-                    <a class='card-title fw-bold text-body stretched-link'
+                    <a class='card-title fw-bold text-body stretched-link mb-1'
                        href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
                     <div class='card-text position-relative d-inline-block'>
-                        <a href='{{userURL .Writer}}' class='text-body stretched-link'>
+                        <img class='rounded-circle' src='{{userPic .Writer}}' alt='Profile pic' width='32'>
+                        <a href='{{userURL .Writer}}' class='stretched-link'>
                             {{.Writer.Name}}
                         </a>
                     </div>

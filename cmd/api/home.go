@@ -9,7 +9,50 @@ import (
 )
 
 func (app *application) handleShowHomePage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "home.page.gohtml", nil)
+	page := 1
+	var err error
+	values := r.URL.Query()
+	if values.Has("p") {
+		page, err = strconv.Atoi(values.Get("p"))
+		if err != nil {
+			app.clientError(w, http.StatusNotFound)
+			return
+		}
+		if page < 1 {
+			app.clientError(w, http.StatusNotFound)
+			return
+		}
+	}
+
+	var filters data.Filters
+	filters.Page = page
+	filters.PageSize = 10
+
+	articles, metaData, err := app.models.Articles.GetNewestArticles(filters)
+	if err == data.ErrRecordNotFound {
+		app.clientError(w, http.StatusNotFound)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	pubs, err := app.models.Publications.GetArticlePublications(articles)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+	writers, err := app.models.Users.GetArticleWriters(articles)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "home.page.gohtml", &templateData{
+		Articles:  articles,
+		Metadata:  metaData,
+		PubMap:    pubs,
+		WriterMap: writers,
+	})
 }
 
 func (app *application) handleRender(w http.ResponseWriter, r *http.Request) {
