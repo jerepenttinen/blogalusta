@@ -11,26 +11,62 @@
 {{end}}
 
 {{define "body"}}
-    {{with .Article}}
-        <article class='pt-5 text-wrap fs-5 lh-base'>
-            <h1>{{.Title}}</h1>
-            <div class='fs-6 mb-3'>
-                <div class='position-relative d-inline-block'>
-                    <img class='rounded-circle' src='{{userPic .Writer}}' alt='Profile pic' width='44'>
+    {{with $article := .Article}}
+        {{$publication := $.Publication}}
+        {{$writer := $article.Writer}}
+        {{$like := $.Like}}
+        <div class='mt-5 mb-3 text-wrap fs-5 lh-base container'>
+            <div class='row'>
+                <div class='col'><h1>{{$article.Title}}</h1></div>
+            </div>
+            <div class='row justify-content-between'>
+                <div class='col fs-6'>
+                    <div class='position-relative d-inline-block'>
+                        <img class='rounded-circle' src='{{userPic .Writer}}' alt='Profile pic' width='44'>
+                        &nbsp;
+                        <a href='{{userURL .Writer}}' class='stretched-link'>
+                            {{.Writer.Name}}
+                        </a>
+                    </div>
                     &nbsp;
-                    <a href='{{userURL .Writer}}' class='stretched-link'>
-                        {{.Writer.Name}}
-                    </a>
+                    <div title='{{rfc3339 .CreatedAt}}' class='position-relative d-inline-block'>
+                        <time datetime='{{rfc3339 .CreatedAt}}' class='stretched-link'>{{humanDate .CreatedAt}}</time>
+                    </div>
                 </div>
-                &nbsp;
-                <div title='{{rfc3339 .CreatedAt}}' class='position-relative d-inline-block'>
-                    <time datetime='{{rfc3339 .CreatedAt}}' class='stretched-link'>{{humanDate .CreatedAt}}</time>
-                </div>
-            </div>
+                <div class='col' style='max-width: max-content'>
+                    <div class='position-relative d-inline-block' title='Like'>
+                        {{$end := "like"}}
+                        {{if $like.HasLiked}}
+                            {{$end = "unlike"}}
+                        {{end}}
+                        <form action='{{$publication.GetArticleURL .}}/{{$end}}' method='post'>
+                            {{template "csrf" $}}
+                            <button type='submit' class='btn btn-link stretched-link px-0'>
+                                {{if $like.HasLiked}}
+                                    <i class='bi-hand-thumbs-up-fill fs-5'></i>
+                                {{else}}
+                                    <i class='bi-hand-thumbs-up fs-5'></i>
+                                {{end}}
+                            </button>
+                            {{if gt $like.Count 0}}
+                                <span class='fs-6 align-middle'>{{$like.Count}}</span>
+                            {{end}}
+                        </form>
+                    </div>
 
-            <div class='md'>
-                {{$.HTML}}
+                    <div class='position-relative d-inline-block' title='Comments'>
+                        <a href='#comments' class='btn btn-link stretched-link'>
+                            <i class='bi-chat fs-5'></i>
+                        </a>
+                    </div>
+                </div>
             </div>
+        </div>
+        <article class='container md'>
+            {{$.HTML}}
         </article>
+        <section class='container' id='comments'>
+
+        </section>
     {{end}}
 {{end}}

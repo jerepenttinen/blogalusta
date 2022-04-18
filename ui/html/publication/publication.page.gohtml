@@ -33,19 +33,46 @@
         {{end}}
     </ul>
     {{if .Articles}}
-        {{range .Articles}}
-            <section class='card border-0 rounded-0 pt-2 pb-2'>
-                <div class='card-body'>
-                    <a class='card-title fw-bold text-body stretched-link mb-1'
-                       href='/{{$.Publication.URL}}/{{.URL}}'>{{.Title}}</a><br>
-                    <div class='card-text position-relative d-inline-block'>
-                        <img class='rounded-circle' src='{{userPic .Writer}}' alt='Profile pic' width='32'>
-                        <a href='{{userURL .Writer}}' class='stretched-link'>
-                            {{.Writer.Name}}
-                        </a>
+        {{range $article := .Articles}}
+            {{$publication := $.Publication}}
+            {{$writer := (index $.WriterMap $article.WriterID)}}
+            {{$like := (index $.LikeMap $article.ID)}}
+            <section class='card border-0 rounded-0 pt-2 pb-2 container'>
+                <div class='card-body row'>
+                    <div class='col-1 position-relative d-inline-block' style='z-index: 3' title='Like'>
+                        {{$action := "like"}}
+                        {{if $like.HasLiked}}
+                            {{$action = "unlike"}}
+                        {{end}}
+                        <form action='{{$publication.GetBaseURL}}/{{$action}}/{{$article.ID}}' class='text-center'
+                              method='post'>
+                            {{template "csrf" $}}
+                            <button type='submit' class='btn btn-link stretched-link fs-5 p-0'>
+                                {{if $like.HasLiked}}
+                                    <i class='bi-hand-thumbs-up-fill'></i>
+                                {{else}}
+                                    <i class='bi-hand-thumbs-up'></i>
+                                {{end}}
+                            </button>
+                            <p class='fs-6'>{{formatNum $like.Count}}</p>
+                        </form>
                     </div>
-                    <div title='{{rfc3339 .CreatedAt}}' class='card-text position-relative d-inline-block'>
-                        <time datetime='{{rfc3339 .CreatedAt}}' class='stretched-link'>{{humanDate .CreatedAt}}</time>
+
+                    <div class='col'>
+                        <a class='card-title fw-bold text-body stretched-link mb-1'
+                           href='{{$publication.GetArticleURL $article}}'>{{$article.Title}}</a><br>
+                        <div class='card-text position-relative d-inline-block'>
+                            <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic' width='32'>
+                            <a href='{{userURL $writer}}' class='stretched-link'>
+                                {{$writer.Name}}
+                            </a>
+                        </div>
+                        <div title='{{rfc3339 $article.CreatedAt}}' class='card-text position-relative d-inline-block'>
+                            <time datetime='{{rfc3339 $article.CreatedAt}}'
+                                  class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
+                        </div>
+                        &nbsp;
+                        <i class='bi-chat fs-6'></i>
                     </div>
                 </div>
             </section>

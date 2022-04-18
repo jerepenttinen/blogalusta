@@ -47,11 +47,15 @@ func (app *application) handleShowHomePage(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	user := app.authenticatedUser(r)
+	likeMap, err := app.models.Articles.LikesMany(articles, user)
+
 	app.render(w, r, "home.page.gohtml", &templateData{
 		Articles:  articles,
 		Metadata:  metaData,
 		PubMap:    pubs,
 		WriterMap: writers,
+		LikeMap:   likeMap,
 	})
 }
 
@@ -100,4 +104,56 @@ func (app *application) handleGetImage(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) handleGetDefaultImage(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/static/img/default.png", http.StatusSeeOther)
+}
+
+func (app *application) handleLikeArticleHome(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+
+	articleID, err := strconv.Atoi(chi.URLParam(r, "articleID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	article, err := app.models.Articles.Get(articleID)
+	if err == data.ErrRecordNotFound {
+		app.clientError(w, http.StatusNotFound)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = app.likeArticle(w, user, article)
+	if err != nil {
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) handleUnlikeArticleHome(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+
+	articleID, err := strconv.Atoi(chi.URLParam(r, "articleID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	article, err := app.models.Articles.Get(articleID)
+	if err == data.ErrRecordNotFound {
+		app.clientError(w, http.StatusNotFound)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = app.unlikeArticle(w, user, article)
+	if err != nil {
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

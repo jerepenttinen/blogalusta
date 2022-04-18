@@ -20,6 +20,11 @@ type Article struct {
 	Version       int
 }
 
+type Like struct {
+	Count    int
+	HasLiked bool
+}
+
 func (a *Article) SetURL() {
 	a.URL = slug.Make(a.Title) + "-" + strconv.FormatInt(a.ID, 10)
 }
@@ -143,4 +148,75 @@ func (m *ArticleModel) GetNewestArticles(filters Filters) ([]*Article, Metadata,
 	metaData := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
 
 	return articles, metaData, nil
+}
+
+func (m *ArticleModel) LikesMany(articles []*Article, user *User) (map[int]*Like, error) {
+	likes := make(map[int]*Like)
+
+	for _, article := range articles {
+		if _, ok := likes[int(article.ID)]; ok {
+			continue
+		}
+
+		like, err := m.Likes(article, user)
+
+		if err != nil {
+			return nil, err
+		}
+		likes[int(article.ID)] = like
+	}
+
+	return likes, nil
+}
+
+func (m *ArticleModel) Likes(article *Article, user *User) (*Like, error) {
+	query := `
+		SELECT COUNT(*) as likes
+		FROM article_like
+		WHERE article_id = $1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	defer cancel()
+
+	row := m.DB.QueryRowContext(ctx, query, article.ID)
+
+	like := &Like{}
+	err := row.Scan(&like.Count)
+	if err == sql.ErrNoRows {
+		return nil, ErrRecordNotFound
+	} else if err != nil {
+		return nil, err
+	}
+
+	like.HasLiked, err = m.UserHasLiked(article, user)
+	if err != nil {
+		return nil, err
+	}
+
+	return like, nil
+}
+
+func (m *ArticleModel) UserHasLiked(article *Article, user *User) (bool, error) {
+	if user == nil || article == nil {
+		return false, nil
+	}
+
+	query := `
+		SELECT 1
+		FROM article_like al
+		WHERE al.user_id = $1 AND al.article_id = $2
+		LIMIT 1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	var exists int
+	err := m.DB.QueryRowContext(ctx, query, user.ID, article.ID).Scan(&exists)
+	if err == sql.ErrNoRows {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
 }

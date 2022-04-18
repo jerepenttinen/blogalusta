@@ -8,6 +8,7 @@ import (
 	"html/template"
 	"io/fs"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -30,10 +31,12 @@ type templateData struct {
 	Article        *data.Article
 	Articles       []*data.Article
 	HTML           template.HTML
+	Like           *data.Like
 
 	Metadata  data.Metadata
 	PubMap    map[int]*data.Publication
 	WriterMap map[int]*data.User
+	LikeMap   map[int]*data.Like
 }
 
 func humanDate(t time.Time) string {
@@ -100,6 +103,13 @@ func seq(first, last int) []int {
 	return result
 }
 
+func formatNum(num int) string {
+	if num > 999 {
+		return fmt.Sprintf("%.1f k", float64(num/1000))
+	}
+	return strconv.Itoa(num)
+}
+
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"rfc3339":   rfc3339,
@@ -108,6 +118,7 @@ var functions = template.FuncMap{
 	"userIn":    userIn,
 	"add":       add,
 	"seq":       seq,
+	"formatNum": formatNum,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {

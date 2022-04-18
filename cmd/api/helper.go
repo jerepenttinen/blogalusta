@@ -183,3 +183,43 @@ func cropCenterResize(img image.Image, sideLength int) (image.Image, error) {
 
 	return dst, nil
 }
+
+func (app *application) likeArticle(w http.ResponseWriter, user *data.User, article *data.Article) error {
+	hasLiked, err := app.models.Articles.UserHasLiked(article, user)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return err
+	}
+	if hasLiked {
+		app.clientError(w, http.StatusBadRequest)
+		return errors.New("already liked")
+	}
+
+	err = app.models.Users.Like(user, article)
+	if err != nil {
+		app.serverError(w, err)
+		return err
+	}
+
+	return nil
+}
+
+func (app *application) unlikeArticle(w http.ResponseWriter, user *data.User, article *data.Article) error {
+	hasLiked, err := app.models.Articles.UserHasLiked(article, user)
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return err
+	}
+
+	if !hasLiked {
+		app.clientError(w, http.StatusBadRequest)
+		return errors.New("not liked")
+	}
+
+	err = app.models.Users.Unlike(user, article)
+	if err != nil {
+		app.serverError(w, err)
+		return err
+	}
+	return nil
+}

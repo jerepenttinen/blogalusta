@@ -9,27 +9,25 @@ import (
 )
 
 func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http.Request) {
-	articles, err := app.models.Articles.GetArticlesOfPublication(app.publication(r))
+	td := &templateData{}
+	var err error
+
+	td.Articles, err = app.models.Articles.GetArticlesOfPublication(app.publication(r))
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	for i := range articles {
-		articles[i].Writer, err = app.models.Users.Get(int(articles[i].WriterID))
-		if err != nil {
-			app.serverError(w, err)
-			return
-		}
+	td.WriterMap, err = app.models.Users.GetArticleWriters(td.Articles)
+	if err != nil {
+		app.serverError(w, err)
+		return
 	}
 
-	app.render(w, r, "publication.page.gohtml", &templateData{
-		Articles: articles,
-	})
-}
+	user := app.authenticatedUser(r)
+	td.LikeMap, err = app.models.Articles.LikesMany(td.Articles, user)
 
-func (app *application) handleShowArticlePage(w http.ResponseWriter, r *http.Request) {
-	app.render(w, r, "article.page.gohtml", nil)
+	app.render(w, r, "publication.page.gohtml", td)
 }
 
 func (app *application) handleShowCreateArticlePage(w http.ResponseWriter, r *http.Request) {
@@ -220,4 +218,58 @@ func (app *application) handleKickWriter(w http.ResponseWriter, r *http.Request)
 
 	app.session.Put(r, "flash", "Writer kicked from publication")
 	http.Redirect(w, r, publication.GetSettingsURL(), http.StatusSeeOther)
+}
+
+func (app *application) handleLikeArticlePublication(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+	publication := app.publication(r)
+
+	articleID, err := strconv.Atoi(chi.URLParam(r, "articleID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	article, err := app.models.Articles.Get(articleID)
+	if err == data.ErrRecordNotFound {
+		app.clientError(w, http.StatusNotFound)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = app.likeArticle(w, user, article)
+	if err != nil {
+		return
+	}
+
+	http.Redirect(w, r, publication.GetBaseURL(), http.StatusSeeOther)
+}
+
+func (app *application) handleUnlikeArticlePublication(w http.ResponseWriter, r *http.Request) {
+	user := app.authenticatedUser(r)
+	publication := app.publication(r)
+
+	articleID, err := strconv.Atoi(chi.URLParam(r, "articleID"))
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	article, err := app.models.Articles.Get(articleID)
+	if err == data.ErrRecordNotFound {
+		app.clientError(w, http.StatusNotFound)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	err = app.unlikeArticle(w, user, article)
+	if err != nil {
+		return
+	}
+
+	http.Redirect(w, r, publication.GetBaseURL(), http.StatusSeeOther)
 }
