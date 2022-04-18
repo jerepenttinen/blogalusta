@@ -40,9 +40,9 @@
     {{end}}
     <div class='container mb-3'>
         <b class='mb-3'>Writers</b>
-        {{with .Writers}}
+        {{if gt (len .Writers) 1}}
             <div class='row row-cols-2 gap-3 mt-3'>
-                {{range .}}
+                {{range .Writers}}
                     {{if ne .ID $.Publication.OwnerID}}
                         <section class='col card border-0' style='margin: -0.25em -0.25em'>
                             <div class='card-body'>
@@ -66,13 +66,15 @@
                 {{end}}
             </div>
         {{else}}
-            <small class='muted'>No writers</small>
+            <p>
+                <small class='muted'>No writers</small>
+            </p>
         {{end}}
     </div>
 
     <div class='container'>
-        <b class='mb-3'>Invite a new writer</b>
-        <form class='mb-3' action='/{{.Publication.URL}}/invite' method='post'>
+        <b>Invite a new writer</b>
+        <form class='mt-1 mb-3' action='/{{.Publication.URL}}/invite' method='post'>
             {{template "csrf" $}}
             <input class='form-control mb-3' type='email' name='email' id='email-input' placeholder='Email'
                    required>
@@ -109,7 +111,8 @@
     {{end}}
 
     <div class='container'>
-        <form action='/{{.Publication.ID}}/delete' method='post'>
+        <b>Delete publication</b>
+        <form action='/{{.Publication.URL}}/delete' method='post' onsubmit='return confirm("Are you sure?")' class='mt-1'>
             {{template "csrf" $}}
             <button class='btn btn-danger' type='submit'>
                 Delete

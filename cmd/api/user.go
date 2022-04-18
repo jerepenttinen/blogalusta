@@ -5,6 +5,7 @@ import (
 	"blogalusta/internal/forms"
 	"bytes"
 	"errors"
+	"fmt"
 	"github.com/go-chi/chi/v5"
 	"image"
 	"image/jpeg"
@@ -36,6 +37,11 @@ func (app *application) handleSignup(w http.ResponseWriter, r *http.Request) {
 	form.MaxLength("password", 72)
 
 	if !form.Valid() {
+		if form.Errors.Has("email") {
+			app.session.Put(r, "flash", form.Errors.Get("email"))
+		} else if form.Errors.Has("password") {
+			app.session.Put(r, "flash", form.Errors.Get("password"))
+		}
 		app.render(w, r, "signup.page.gohtml", &templateData{Form: form})
 		return
 	}
@@ -148,33 +154,20 @@ func (app *application) handleShowProfilePage(w http.ResponseWriter, r *http.Req
 	}
 
 	app.render(w, r, "profile.page.gohtml", &templateData{
-		Publications: publications,
+		ProfilePublications: publications,
 	})
 }
 
 func (app *application) handleDeletePublication(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	publication := app.publication(r)
+	err := app.models.Publications.Delete(publication)
 	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
+		app.serverError(w, err)
 		return
 	}
 
-	form := forms.New(r.PostForm)
-	user := app.authenticatedUser(r)
-	publicationID, err := strconv.Atoi(form.Get("publication-id"))
-	if err != nil {
-		app.clientError(w, http.StatusBadRequest)
-		return
-	}
-
-	err = app.models.Publications.Delete(user.ID, int64(publicationID))
-	if err != nil {
-		app.clientError(w, http.StatusMethodNotAllowed)
-		return
-	}
-
-	app.session.Put(r, "flash", "Deleted a publication")
-	http.Redirect(w, r, r.URL.Path, http.StatusSeeOther)
+	app.session.Put(r, "flash", fmt.Sprintf("%s deleted!", publication.Name))
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) handleShowChoosePublicationPage(w http.ResponseWriter, r *http.Request) {
@@ -187,7 +180,7 @@ func (app *application) handleShowChoosePublicationPage(w http.ResponseWriter, r
 	}
 
 	app.render(w, r, "choose_publication.page.gohtml", &templateData{
-		Publications: publications,
+		ProfilePublications: publications,
 	})
 }
 

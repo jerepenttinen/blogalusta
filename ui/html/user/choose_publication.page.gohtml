@@ -4,9 +4,9 @@
 
 {{define "body"}}
     <h4>Choose publication</h4>
-    {{if .Publications.WritesOn}}
+    {{if .ProfilePublications.WritesOn}}
         <div class='list-group'>
-            {{range .Publications.WritesOn}}
+            {{range .ProfilePublications.WritesOn}}
                 <a class='list-group-item list-group-item-action py-3 fw-bold' href='/{{.URL}}/article'>{{.Name}}</a>
             {{end}}
         </div>

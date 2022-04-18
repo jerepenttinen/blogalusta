@@ -34,10 +34,9 @@ func (p *Publication) GetArticleURL(article *Article) string {
 	return fmt.Sprintf("/%s/%s", p.URL, article.URL)
 }
 
-type Publications struct {
+type Profile struct {
 	SubscribesTo []*Publication
 	WritesOn     []*Publication
-	Owns         []*Publication
 }
 
 type PublicationModel struct {
@@ -66,8 +65,8 @@ func (m *PublicationModel) GetBySlug(slug string) (*Publication, error) {
 	return p, nil
 }
 
-func (m *PublicationModel) GetUsersPublications(userID int64) (*Publications, error) {
-	ps := &Publications{}
+func (m *PublicationModel) GetUsersPublications(userID int64) (*Profile, error) {
+	ps := &Profile{}
 
 	qt := []struct {
 		query string
@@ -107,22 +106,6 @@ func (m *PublicationModel) GetUsersPublications(userID int64) (*Publications, er
 			WHERE u.id = $1;`,
 			pubs: &ps.SubscribesTo,
 		},
-		{
-			query: `
-			SELECT
-				op.id,
-				op.name,
-				op.url,
-				op.description,
-				op.owner_id,
-				op.created_at,
-				op.version
-			FROM
-				users u
-			JOIN publication op on u.id = op.owner_id
-			WHERE u.id = $1;`,
-			pubs: &ps.Owns,
-		},
 	}
 
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
@@ -152,16 +135,16 @@ func (m *PublicationModel) GetUsersPublications(userID int64) (*Publications, er
 	return ps, nil
 }
 
-func (m *PublicationModel) Delete(userID, publicationID int64) error {
+func (m *PublicationModel) Delete(publication *Publication) error {
 	query := `
 		DELETE
 		FROM publication p
-		WHERE p.owner_id = $1 AND p.id = $2;`
+		WHERE p.id = $1;`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := m.DB.ExecContext(ctx, query, userID, publicationID)
+	_, err := m.DB.ExecContext(ctx, query, publication.ID)
 
 	if err != nil {
 		return err

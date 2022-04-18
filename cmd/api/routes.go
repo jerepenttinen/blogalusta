@@ -60,6 +60,7 @@ func (app *application) routes() *chi.Mux {
 					r.Post("/invite", app.handleInviteWriter)
 					r.Post("/withdraw/{userID:[0-9]+}", app.handleWithdrawInvitation)
 					r.Post("/kick/{userID:[0-9]+}", app.handleKickWriter)
+					r.Post("/delete", app.handleDeletePublication)
 				})
 			})
 		})

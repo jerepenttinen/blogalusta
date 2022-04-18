@@ -21,6 +21,14 @@
                     <div title='{{rfc3339 $article.CreatedAt}}' class='card-text position-relative d-inline-block'>
                         <time datetime='{{rfc3339 $article.CreatedAt}}' class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
                     </div>
+                    <div class='card-text position-relative d-inline-block'>
+                        <span class='text-muted'><small>to </small></span>
+                        <a href='/{{$publication.URL}}' class='stretched-link'>
+                            <small>
+                                {{$publication.Name}}
+                            </small>
+                        </a>
+                    </div>
                 </div>
             </section>
         {{end}}

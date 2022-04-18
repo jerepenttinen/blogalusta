@@ -13,3 +13,8 @@ func (e errors) Get(field string) string {
 	}
 	return es[0]
 }
+
+func (e errors) Has(field string) bool {
+	_, ok := e[field]
+	return ok
+}

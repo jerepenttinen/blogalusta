@@ -19,7 +19,7 @@ type templateData struct {
 
 	AuthenticatedUser    *data.User
 	ProfileUser          *data.User
-	Publications         *data.Publications
+	ProfilePublications  *data.Profile
 	InvitingPublications []*data.Publication
 
 	Publication    *data.Publication
