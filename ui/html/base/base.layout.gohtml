@@ -17,76 +17,82 @@
     <header>
         <nav class='navbar navbar-expand'>
             <div class='container'>
-                <div class='navbar-brand' title='Blogalusta homepage'><a href='/'>Blogalusta</a></div>
+                <div class='navbar-brand col-md-4' title='Blogalusta homepage'>
+                    <a class='d-md-none h1' href='/'>B</a>
+                    <a class='d-md-block d-none' href='/'>Blogalusta</a>
+                </div>
                 {{with $publication := $.Publication}}
-                    <div class='position-absolute top-50 start-50 translate-middle' title='{{$publication.Name}}'>
-                        <a class='text-reset h2' href='/{{$publication.URL}}'>{{$publication.Name}}</a>
+                    <div class='mr-auto text-truncate' title='{{$publication.Name}}'>
+                        <a class='text-body fw-bold d-md-none' href='{{$publication.GetBaseURL}}'>{{$publication.Name}}</a>
+                        <a class='text-body fw-bold h2 d-md-block d-none' href='{{$publication.GetBaseURL}}'>{{$publication.Name}}</a>
                     </div>
                 {{end}}
-                <ul class='navbar-nav'>
-                    {{$user := $.AuthenticatedUser}}
-                    {{if $user}}
-                        {{block "nav" .}}
-                            {{template "newarticleuser" .}}
+                <div class='col col-md-4 d-flex flex-column'>
+                    <ul class='navbar-nav align-self-end'>
+                        {{$user := $.AuthenticatedUser}}
+                        {{if $user}}
+                            {{block "nav" .}}
+                                {{template "newarticleuser" .}}
+                            {{end}}
+                            <li class='nav-item dropdown'>
+                                <a href='#' class='dropdown-toggle dropdown-toggle-remove' data-bs-toggle='dropdown'>
+                                    <img class='rounded-circle' src='{{userPic $user}}'
+                                         alt='Profile pic' width='40'>
+                                </a>
+                                <ul class='dropdown-menu dropdown-menu-end' style='min-width: max-content'>
+                                    <li class='container dropdown-item'>
+                                        <div class='row align-items-center position-relative'>
+                                            <div class='col col-auto'>
+                                                <img class='rounded-circle' src='{{userPic $user}}'
+                                                     alt='Profile pic' width='64'>
+                                            </div>
+                                            <div class='col text-truncate'>
+                                                <a href='{{userURL $user}}'
+                                                   class='stretched-link px-0'>
+                                                    <b class='text-body'>{{$user.Name}}</b>
+                                                </a>
+                                                <br>
+                                                <small class='card-text'>{{$user.Email}}</small>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <hr class='dropdown-divider'>
+                                    </li>
+                                    <li>
+                                        <a href='{{userURL $user}}' class='dropdown-item py-2'>
+                                            <i class='bi-person'></i>&nbsp;Profile
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href='/user/invitations' class='dropdown-item py-2'>
+                                            <i class='bi-envelope'></i>&nbsp;Invitations
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href='/user/settings' class='dropdown-item py-2'>
+                                            <i class='bi-gear'></i>&nbsp;Settings
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <hr class='dropdown-divider'>
+                                    </li>
+                                    <li>
+                                        <form action='/user/logout' method='post'>
+                                            {{template "csrf" $}}
+                                            <button type='submit' class='dropdown-item py-2'>
+                                                <i class='bi-box-arrow-in-left'></i>&nbsp;Logout
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
+                            </li>
+                        {{else}}
+                            <li class='nav-item'><a href='/user/signup' class='nav-link'>Signup</a></li>
+                            <li class='nav-item'><a href='/user/login' class='nav-link'>Login</a></li>
                         {{end}}
-                        <li class='nav-item dropdown'>
-                            <a href='#' class='dropdown-toggle dropdown-toggle-remove' data-bs-toggle='dropdown'>
-                                <img class='rounded-circle' src='{{userPic $user}}'
-                                     alt='Profile pic' width='40'>
-                            </a>
-                            <ul class='dropdown-menu dropdown-menu-end' style='min-width: max-content; max-width: 10em'>
-                                <li class='container dropdown-item'>
-                                    <div class='row align-items-center position-relative'>
-                                        <div class='col col-auto'>
-                                            <img class='rounded-circle' src='{{userPic $user}}'
-                                                 alt='Profile pic' width='64'>
-                                        </div>
-                                        <div class='col text-truncate'>
-                                            <a href='{{userURL $user}}'
-                                               class='stretched-link px-0'>
-                                                <b class='text-body'>{{$user.Name}}</b>
-                                            </a>
-                                            <br>
-                                            <small class='card-text'>{{$user.Email}}</small>
-                                        </div>
-                                    </div>
-                                </li>
-                                <li>
-                                    <hr class='dropdown-divider'>
-                                </li>
-                                <li>
-                                    <a href='{{userURL $user}}' class='dropdown-item py-2'>
-                                        <i class='bi-person'></i>&nbsp;Profile
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href='/user/invitations' class='dropdown-item py-2'>
-                                        <i class='bi-envelope'></i>&nbsp;Invitations
-                                    </a>
-                                </li>
-                                <li>
-                                    <a href='/user/settings' class='dropdown-item py-2'>
-                                        <i class='bi-gear'></i>&nbsp;Settings
-                                    </a>
-                                </li>
-                                <li>
-                                    <hr class='dropdown-divider'>
-                                </li>
-                                <li>
-                                    <form action='/user/logout' method='post'>
-                                        {{template "csrf" $}}
-                                        <button type='submit' class='dropdown-item py-2'>
-                                            <i class='bi-box-arrow-in-left'></i>&nbsp;Logout
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    {{else}}
-                        <li class='nav-item'><a href='/user/signup' class='nav-link'>Signup</a></li>
-                        <li class='nav-item'><a href='/user/login' class='nav-link'>Login</a></li>
-                    {{end}}
-                </ul>
+                    </ul>
+                </div>
             </div>
         </nav>
     </header>
@@ -94,6 +100,8 @@
         <div class='text-center alert alert-danger'>
             {{.}}
         </div>
+    {{else}}
+        <hr class='my-0'>
     {{end}}
     <section class='container-md'>
         {{template "body" .}}

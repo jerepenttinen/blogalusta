@@ -4,7 +4,7 @@
 
 {{define "body"}}
     {{if .Articles}}
-        <h3>Top articles past week</h3>
+        <h3 class='mt-2'>Top articles past week</h3>
         {{range $article := .Articles}}
             {{$publication := (index $.PubMap $article.PublicationID)}}
             {{$writer := (index $.UserMap $article.WriterID)}}
@@ -17,7 +17,7 @@
                     {{if $like.HasLiked}}
                         {{$action = "unlike"}}
                     {{end}}
-                    <div class='col-1 my-auto position-relative d-inline-block' style='z-index: 3' title='{{$action}}'>
+                    <div class='col col-auto my-auto position-relative d-inline-block px-2' style='z-index: 3' title='{{$action}}'>
                         <form action='/{{$article.ID}}/{{$action}}' class='text-center'
                               method='post'>
                             {{template "csrf" $}}
@@ -33,19 +33,25 @@
                         </form>
                     </div>
 
-                    <div class='col'>
-                        <div class='text-break mb-1' title='{{$article.Title}}'>
+                    <div class='col px-0 mx-1'>
+                        <div class='text-break' title='{{$article.Title}}'>
                             <a class='card-title fw-bold text-body stretched-link mb-1'
                                href='{{$publication.GetArticleURL $article}}'>{{$article.Title}}</a><br>
                         </div>
-                        <div class='row'>
-                            <div class='col col-auto pe-0 card-text position-relative d-inline-block text-truncate'
+                        <div class='row mx-0'>
+                            <div class='col col-auto px-0 me-1 card-text position-relative d-inline-block text-truncate'
                                  style='max-width: 48ch' title='{{$writer.Name}}'>
-                                <img class='rounded-circle pe-1' src='{{userPic $writer}}' alt='Profile pic' width='32'>
-                                <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
+                                <div class='row mx-0'>
+                                    <div class='col col-auto px-0 me-2'>
+                                        <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic' width='32'>
+                                    </div>
+                                    <div class='col my-auto px-0'>
+                                        <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
+                                    </div>
+                                </div>
                             </div>
-                            <div class='col col-auto ps-1'>
-                                <div class='card-text position-relative d-inline-block text-muted text-truncate'
+                            <div class='col col-auto px-0 d-inline-flex my-auto'>
+                                <div class='card-text position-relative text-muted me-2'
                                      style='max-width: 32ch' title='{{$publication.Name}}'>
                                     <span>to </span>
                                     <a href='{{$publication.GetBaseURL}}'
@@ -53,13 +59,12 @@
                                 </div>
                                 <div title='{{rfc3339 $article.CreatedAt}}'
                                      style='display: block; cursor: pointer'
-                                     class='card-text position-relative d-inline-block text-truncate'>
+                                     class='card-text position-relative'>
                                     <time datetime='{{rfc3339 $article.CreatedAt}}'
                                           class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
                                 </div>
-                                &nbsp;
                                 {{if gt $commentcount 0}}
-                                    <div class='card-text position-relative d-inline-block text-truncate'>
+                                    <div class='card-text position-relative ms-2'>
                                         <i class='bi-chat fs-6'></i>
                                         <span>{{$commentcount}}</span>
                                     </div>

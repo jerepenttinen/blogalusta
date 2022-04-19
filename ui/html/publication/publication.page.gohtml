@@ -11,27 +11,29 @@
 {{end}}
 
 {{define "body"}}
-    <ul class='nav justify-content-center'>
-        <li class='nav-item'>
-            <a href='/{{.Publication.URL}}' class='nav-link'>
-                Articles
-            </a>
-        </li>
-        <li class='nav-item'>
-            <a href='/{{.Publication.URL}}/about' class='nav-link'>
-                About
-            </a>
-        </li>
-        {{if .AuthenticatedUser}}
-            {{if eq .AuthenticatedUser.ID .Publication.OwnerID}}
-                <li class='nav-item'>
-                    <a href='/{{.Publication.URL}}/settings' class='nav-link active'>
-                        Settings
-                    </a>
-                </li>
+    <div class='container'>
+        <ul class='nav justify-content-md-center'>
+            <li class='nav-item'>
+                <a href='/{{.Publication.URL}}' class='nav-link'>
+                    Articles
+                </a>
+            </li>
+            <li class='nav-item'>
+                <a href='/{{.Publication.URL}}/about' class='nav-link'>
+                    About
+                </a>
+            </li>
+            {{if .AuthenticatedUser}}
+                {{if eq .AuthenticatedUser.ID .Publication.OwnerID}}
+                    <li class='nav-item'>
+                        <a href='/{{.Publication.URL}}/settings' class='nav-link active'>
+                            Settings
+                        </a>
+                    </li>
+                {{end}}
             {{end}}
-        {{end}}
-    </ul>
+        </ul>
+    </div>
     {{if .Articles}}
         {{range $article := .Articles}}
             {{$publication := $.Publication}}
@@ -45,10 +47,12 @@
                     {{if $like.HasLiked}}
                         {{$action = "unlike"}}
                     {{end}}
-                    <div class='col-1 my-auto position-relative d-inline-block' style='z-index: 3' title='{{$action}}'>
+                    <div class='col col-auto my-auto position-relative d-inline-block px-2' style='z-index: 3'
+                         title='{{$action}}'>
                         <form action='{{$publication.GetBaseURL}}/{{$article.ID}}/{{$action}}' class='text-center'
                               method='post'>
                             {{template "csrf" $}}
+                            <input type='hidden' name='page' value='{{$.Metadata.CurrentPage}}'>
                             <button type='submit' class='btn btn-link stretched-link fs-5 p-0'>
                                 {{if $like.HasLiked}}
                                     <i class='bi-hand-thumbs-up-fill'></i>
@@ -60,27 +64,33 @@
                         </form>
                     </div>
 
-                    <div class='col'>
-                        <div class='text-break mb-1' title='{{$article.Title}}'>
+                    <div class='col px-0 mx-1'>
+                        <div class='text-break' title='{{$article.Title}}'>
                             <a class='card-title fw-bold text-body stretched-link mb-1'
                                href='{{$publication.GetArticleURL $article}}'>{{$article.Title}}</a><br>
                         </div>
-                        <div class='row'>
-                            <div class='col col-auto pe-0 card-text position-relative d-inline-block text-truncate'
+                        <div class='row mx-0'>
+                            <div class='col col-auto px-0 me-2 card-text position-relative d-inline-block text-truncate'
                                  style='max-width: 48ch' title='{{$writer.Name}}'>
-                                <img class='rounded-circle pe-1' src='{{userPic $writer}}' alt='Profile pic' width='32'>
-                                <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
+                                <div class='row mx-0'>
+                                    <div class='col col-auto px-0 me-2'>
+                                        <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic'
+                                             width='32'>
+                                    </div>
+                                    <div class='col my-auto px-0'>
+                                        <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
+                                    </div>
+                                </div>
                             </div>
-                            <div class='col col-auto'>
+                            <div class='col col-auto px-0 d-inline-flex my-auto'>
                                 <div title='{{rfc3339 $article.CreatedAt}}'
                                      style='display: block; cursor: pointer'
-                                     class='card-text position-relative d-inline-block'>
+                                     class='card-text position-relative me-2'>
                                     <time datetime='{{rfc3339 $article.CreatedAt}}'
                                           class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
                                 </div>
-                                &nbsp;
                                 {{if gt $commentcount 0}}
-                                    <div class='card-text position-relative d-inline-block'>
+                                    <div class='card-text position-relative'>
                                         <i class='bi-chat fs-6'></i>
                                         <span>{{$commentcount}}</span>
                                     </div>
@@ -90,6 +100,7 @@
                     </div>
                 </div>
             </section>
+
         {{end}}
     {{else}}
         <h1>Coming soon</h1>

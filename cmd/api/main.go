@@ -107,7 +107,7 @@ func main() {
 	defer db.Close()
 
 	session := sessions.New([]byte(*secret))
-	session.Lifetime = 24 * 365 * time.Hour
+	session.Lifetime = 24 * time.Hour
 	session.Secure = true
 	session.SameSite = http.SameSiteStrictMode
 
