@@ -42,17 +42,17 @@
     <div class='container mb-3'>
         <b class='mb-3'>Writers</b>
         <div class='row row-cols-2 gap-3 mt-3'>
-            {{range .Writers}}
-                <section class='col card border-0' style='margin: -0.25em -0.25em'>
-                    <div class='card-body'>
-                        <img class='rounded-circle me-4' src='{{userPic .}}'
+            {{range $writer := .Writers}}
+                <section class='col card border-0 px-0' style='margin: -0.25em -0.25em' title='{{$writer.Name}}'>
+                    <div class='card-body text-truncate'>
+                        <img class='rounded-circle me-4' src='{{userPic $writer}}'
                              alt='Profile pic' width='92'>
-                        <a href='{{userURL .}}' class='card-title stretched-link'>
-                            <b class='text-body text-truncate'>{{.Name}}</b>
-                        </a>
-                        {{if eq .ID $.Publication.OwnerID}}
-                            <span class='badge rounded-pill bg-primary'>Owner</span>
+                        {{if eq $writer.ID $.Publication.OwnerID}}
+                            <i class='bi-shield-fill-check text-primary'></i>
                         {{end}}
+                        <a href='{{userURL $writer}}' class='card-title stretched-link'>
+                            <b class='card-title text-body'>{{$writer.Name}}</b>
+                        </a>
                     </div>
                 </section>
             {{end}}
@@ -61,15 +61,15 @@
 
     {{with .Publication}}
         <section class='container mb-3'>
-            <b>Established</b>
             <div title='{{rfc3339 .CreatedAt}}' style='display: block; cursor: pointer'>
+                <b>Established</b><br>
                 <time datetime='{{rfc3339 .CreatedAt}}'>{{humanDate .CreatedAt}}</time>
             </div>
         </section>
     {{end}}
     {{if .AuthenticatedUser}}
         {{if and .IsWriter (ne .AuthenticatedUser.ID .Publication.OwnerID)}}
-            <section class='container'>
+            <section class='container' title='Leave'>
                 <form class='mb-3' action='/user/publication/{{.Publication.ID}}/leave'
                       method='post'>
                     {{template "csrf" $}}

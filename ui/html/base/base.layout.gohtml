@@ -17,36 +17,37 @@
     <header>
         <nav class='navbar navbar-expand'>
             <div class='container'>
-                <div class='navbar-brand'><a href='/'>Blogalusta</a></div>
-                {{with .Publication}}
-                    <div class='position-absolute top-50 start-50 translate-middle'>
-                        <a class='text-reset h2' href='/{{.URL}}'>{{.Name}}</a>
+                <div class='navbar-brand' title='Blogalusta homepage'><a href='/'>Blogalusta</a></div>
+                {{with $publication := $.Publication}}
+                    <div class='position-absolute top-50 start-50 translate-middle' title='{{$publication.Name}}'>
+                        <a class='text-reset h2' href='/{{$publication.URL}}'>{{$publication.Name}}</a>
                     </div>
                 {{end}}
                 <ul class='navbar-nav'>
-                    {{if .AuthenticatedUser}}
+                    {{$user := $.AuthenticatedUser}}
+                    {{if $user}}
                         {{block "nav" .}}
                             {{template "newarticleuser" .}}
                         {{end}}
                         <li class='nav-item dropdown'>
                             <a href='#' class='dropdown-toggle dropdown-toggle-remove' data-bs-toggle='dropdown'>
-                                <img class='rounded-circle' src='{{userPic .AuthenticatedUser}}'
+                                <img class='rounded-circle' src='{{userPic $user}}'
                                      alt='Profile pic' width='40'>
                             </a>
-                            <ul class='dropdown-menu dropdown-menu-end' style='min-width: max-content'>
+                            <ul class='dropdown-menu dropdown-menu-end' style='min-width: max-content; max-width: 10em'>
                                 <li class='container dropdown-item'>
-                                    <div class='row row-cols-2 align-items-center position-relative'>
-                                        <div class='col-4'>
-                                            <img class='rounded-circle' src='{{userPic .AuthenticatedUser}}'
+                                    <div class='row align-items-center position-relative'>
+                                        <div class='col col-auto'>
+                                            <img class='rounded-circle' src='{{userPic $user}}'
                                                  alt='Profile pic' width='64'>
                                         </div>
-                                        <div class='col-8'>
-                                            <a href='{{userURL .AuthenticatedUser}}'
+                                        <div class='col text-truncate'>
+                                            <a href='{{userURL $user}}'
                                                class='stretched-link px-0'>
-                                                <b class='text-body'>{{.AuthenticatedUser.Name}}</b>
+                                                <b class='text-body'>{{$user.Name}}</b>
                                             </a>
                                             <br>
-                                            <small class='card-text'>{{.AuthenticatedUser.Email}}</small>
+                                            <small class='card-text'>{{$user.Email}}</small>
                                         </div>
                                     </div>
                                 </li>
@@ -54,7 +55,7 @@
                                     <hr class='dropdown-divider'>
                                 </li>
                                 <li>
-                                    <a href='{{userURL .AuthenticatedUser}}' class='dropdown-item py-2'>
+                                    <a href='{{userURL $user}}' class='dropdown-item py-2'>
                                         <i class='bi-person'></i>&nbsp;Profile
                                     </a>
                                 </li>

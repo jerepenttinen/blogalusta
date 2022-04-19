@@ -10,15 +10,13 @@
                 <div class='row mb-3 justify-content-between'>
                     <section class='col card border-0'>
                         <div class='card-body row'>
-                            <div class='col align-top'>
+                            <div class='col my-auto text-truncate'>
                                 <a href='{{.GetBaseURL}}' class='card-title stretched-link'>
-                                    <b class='text-body text-truncate'>{{.Name}}</b>
+                                    <b class='text-body'>{{.Name}}</b>
                                 </a>
-                                <p class='text-truncate'>
-                                    {{.Description}}
-                                </p>
+                                <p class='text-wrap text-truncate' style='display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical'>{{.Description}}</p>
                             </div>
-                            <div class='col my-auto' style='max-width: max-content'>
+                            <div class='col col-auto my-auto'>
                                 <form class='d-inline-block' action='/user/invitations/{{.ID}}/accept'
                                       method='post'>
                                     {{template "csrf" $}}

@@ -41,25 +41,27 @@
     <div class='container mb-3'>
         <b class='mb-3'>Writers</b>
         {{if gt (len .Writers) 1}}
-            {{range .Writers}}
-                {{if ne .ID $.Publication.OwnerID}}
-                    <div class='row mt-3'>
-                        <section class='col card border-0 py-3 position-relative d-inline-block'>
+            {{range $writer := .Writers}}
+                {{if ne $writer.ID $.Publication.OwnerID}}
+                    <div class='row row-cols-2 mt-3'>
+                        <section class='col card border-0 py-3 position-relative d-inline-block'
+                                 title='{{$writer.Name}}'>
                             <div class='card-body row'>
-                                <div class='col'>
-                                    <img class='rounded-circle me-4' src='{{userPic .}}'
+                                <div class='col text-truncate'>
+                                    <img class='rounded-circle me-2' src='{{userPic $writer}}'
                                          alt='Profile pic' width='92'>
-                                    <a href='{{userURL .}}' class='stretched-link'>
-                                        <b class='text-body text-truncate'>{{.Name}}</b>
+                                    <a href='{{userURL $writer}}' class='stretched-link text-body'>
+                                        <b>{{$writer.Name}}</b>
                                     </a>
                                 </div>
-                                <div class='col-2 px-0 my-auto'>
-                                    <form class='d-inline-block' action='/{{$.Publication.URL}}/{{.ID}}/kick'
+                                <div class='col col-auto px-0 my-auto'>
+                                    <form class='d-inline-block'
+                                          action='{{$.Publication.GetBaseURL}}/{{$writer.ID}}/kick'
                                           method='post'>
                                         {{template "csrf" $}}
-                                        <div class='position-relative d-inline-block'>
-                                            <button class='btn btn-danger stretched-link w-100' type='submit'>
-                                                <i class='bi-person-x'></i>&nbsp;Kick
+                                        <div class='position-relative d-inline-block' title='Kick'>
+                                            <button class='btn btn-danger stretched-link' type='submit'>
+                                                <i class='bi-person-x'></i>
                                             </button>
                                         </div>
                                     </form>
@@ -78,11 +80,11 @@
 
     <div class='container'>
         <b>Invite a new writer</b>
-        <form class='mt-1 mb-3' action='/{{.Publication.URL}}/invite' method='post'>
+        <form class='mt-1 mb-3' action='{{.Publication.GetBaseURL}}/invite' method='post'>
             {{template "csrf" $}}
             <input class='form-control mb-3' type='email' name='email' id='email-input' placeholder='Email'
                    required>
-            <button type='submit' class='btn btn-primary'>
+            <button type='submit' class='btn btn-primary' title='Invite'>
                 <i class='bi-person-plus'></i>&nbsp;Invite
             </button>
         </form>
@@ -91,25 +93,25 @@
     {{if .InvitedWriters}}
         <div class='container mb-3'>
             <b class='mb-3'>Pending invitations</b>
-            {{range .InvitedWriters}}
+            {{range $writer := .InvitedWriters}}
                 <div class='row gap-3'>
-                    <section class='col card border-0'>
+                    <section class='col card border-0' title='{{$writer.Name}}'>
                         <div class='card-body row justify-content-between'>
-                            <div class='col'>
-                                <img class='rounded-circle me-4' src='{{userPic .}}'
+                            <div class='col text-truncate'>
+                                <img class='rounded-circle me-2' src='{{userPic $writer}}'
                                      alt='Profile pic' width='92'>
-                                <a href='{{userURL .}}' class='card-title stretched-link'>
-                                    <b class='text-body text-truncate'>{{.Name}}</b>
+                                <a href='{{userURL $writer}}' class='card-title stretched-link'>
+                                    <b class='text-body text-truncate'>{{$writer.Name}}</b>
                                 </a>
                             </div>
-                            <div class='col-2 my-auto px-0'>
+                            <div class='col col-auto my-auto px-0'>
                                 <form class='d-inline-block float-right'
-                                      action='/{{$.Publication.URL}}/{{.ID}}/withdraw'
+                                      action='{{$.Publication.GetBaseURL}}/{{$writer.ID}}/withdraw'
                                       method='post'>
                                     {{template "csrf" $}}
-                                    <div class='position-relative d-inline-block'>
+                                    <div class='position-relative d-inline-block' title='Withdraw invite'>
                                         <button class='btn btn-danger stretched-link' type='submit'>
-                                            <i class='bi-envelope-dash'></i>&nbsp;Withdraw
+                                            <i class='bi-envelope-dash'></i>
                                         </button>
                                     </div>
                                 </form>
@@ -123,8 +125,8 @@
 
     <div class='container'>
         <b>Delete publication</b>
-        <form action='/{{.Publication.URL}}/delete' method='post' onsubmit='return confirm("Are you sure?")'
-              class='mt-1'>
+        <form action='/{{.Publication.URL}}/delete' method='post' title='Delete'
+              onsubmit='return confirm("Are you sure?")' class='mt-1'>
             {{template "csrf" $}}
             <button class='btn btn-danger' type='submit'>
                 <i class='bi-trash'></i>&nbsp;Delete

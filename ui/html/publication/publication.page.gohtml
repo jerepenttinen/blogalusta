@@ -41,11 +41,11 @@
 
             <section class='card border-0 rounded-0 pt-2 pb-2 container'>
                 <div class='card-body row'>
-                    <div class='col-1 position-relative d-inline-block' style='z-index: 3' title='Like'>
-                        {{$action := "like"}}
-                        {{if $like.HasLiked}}
-                            {{$action = "unlike"}}
-                        {{end}}
+                    {{$action := "like"}}
+                    {{if $like.HasLiked}}
+                        {{$action = "unlike"}}
+                    {{end}}
+                    <div class='col-1 my-auto position-relative d-inline-block' style='z-index: 3' title='{{$action}}'>
                         <form action='{{$publication.GetBaseURL}}/{{$article.ID}}/{{$action}}' class='text-center'
                               method='post'>
                             {{template "csrf" $}}
@@ -61,25 +61,32 @@
                     </div>
 
                     <div class='col'>
-                        <a class='card-title fw-bold text-body stretched-link mb-1'
-                           href='{{$publication.GetArticleURL $article}}'>{{$article.Title}}</a><br>
-                        <div class='card-text position-relative d-inline-block'>
-                            <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic' width='32'>
-                            <a href='{{userURL $writer}}' class='stretched-link'>
-                                {{$writer.Name}}
-                            </a>
+                        <div class='text-break mb-1' title='{{$article.Title}}'>
+                            <a class='card-title fw-bold text-body stretched-link mb-1'
+                               href='{{$publication.GetArticleURL $article}}'>{{$article.Title}}</a><br>
                         </div>
-                        <div title='{{rfc3339 $article.CreatedAt}}' class='card-text position-relative d-inline-block'>
-                            <time datetime='{{rfc3339 $article.CreatedAt}}'
-                                  class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
-                        </div>
-                        &nbsp;
-                        {{if gt $commentcount 0}}
-                            <div class='card-text position-relative d-inline-block'>
-                                <i class='bi-chat fs-6'></i>
-                                <span>{{$commentcount}}</span>
+                        <div class='row'>
+                            <div class='col col-auto pe-0 card-text position-relative d-inline-block text-truncate'
+                                 style='max-width: 48ch' title='{{$writer.Name}}'>
+                                <img class='rounded-circle pe-1' src='{{userPic $writer}}' alt='Profile pic' width='32'>
+                                <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
                             </div>
-                        {{end}}
+                            <div class='col col-auto'>
+                                <div title='{{rfc3339 $article.CreatedAt}}'
+                                     style='display: block; cursor: pointer'
+                                     class='card-text position-relative d-inline-block'>
+                                    <time datetime='{{rfc3339 $article.CreatedAt}}'
+                                          class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
+                                </div>
+                                &nbsp;
+                                {{if gt $commentcount 0}}
+                                    <div class='card-text position-relative d-inline-block'>
+                                        <i class='bi-chat fs-6'></i>
+                                        <span>{{$commentcount}}</span>
+                                    </div>
+                                {{end}}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>

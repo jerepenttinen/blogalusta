@@ -3,39 +3,40 @@
 {{define "title"}}{{.AuthenticatedUser.Name}}{{end}}
 
 {{define "body"}}
+    {{$profile := $.ProfileUser}}
     <div class='container mb-3'>
         <div class='row align-middle align-text-top justify-content-between'>
             <div class='col'>
-                <h3 class='text-body'>{{.ProfileUser.Name}}</h3>
+                <h3 class='text-body text-truncate'>{{$profile.Name}}</h3>
                 <section class='container mb-3'>
-                    <div title='{{rfc3339 .ProfileUser.CreatedAt}}' class='text-muted'
+                    <div title='{{rfc3339 $profile.CreatedAt}}' class='text-muted'
                          style='display: block; cursor: pointer'>
                         <span>Joined</span>
-                        <time datetime='{{rfc3339 .ProfileUser.CreatedAt}}'>{{humanDate .ProfileUser.CreatedAt}}</time>
+                        <time datetime='{{rfc3339 $profile.CreatedAt}}'>{{humanDate $profile.CreatedAt}}</time>
                     </div>
                 </section>
             </div>
-            <div class='col' style='max-width: max-content'>
-                <img class='rounded-circle' src='{{userPic .ProfileUser}}' alt='Profile pic' width='128'>
+            <div class='col col-auto'>
+                <img class='rounded-circle' src='{{userPic $profile}}' alt='Profile pic' width='128'>
             </div>
         </div>
     </div>
 
-    {{with .ProfilePublications.WritesOn}}
+    {{with $publications := .ProfilePublications.WritesOn}}
         <div class='container'>
             <div class='mb-1'>
                 <b>Writes</b>
             </div>
             <div class='container mb-3'>
-                <div class='row row-cols-1'>
-                    {{range .}}
-                        <section class='card border-0 rounded-0'>
-                            <div class='card-body'>
-                                <a href='/{{.URL}}'
-                                   class='card-title fw-bold text-body text-truncate mr-auto stretched-link'>
-                                    {{.Name}}
+                <div class='row'>
+                    {{range $publication := $publications}}
+                        <section class='col card border-0 rounded-0'>
+                            <div class='card-body text-truncate'>
+                                <a href='/{{$publication.URL}}'
+                                   class='card-title fw-bold text-body mr-auto stretched-link'>
+                                    {{$publication.Name}}
                                 </a>
-                                <p class='card-text text-truncate'>{{.Description}}</p>
+                                <p class='card-text text-truncate'>{{$publication.Description}}</p>
                             </div>
                         </section>
                     {{end}}
@@ -52,10 +53,10 @@
             <div class='container-fluid'>
                 <div class='row row-cols-3'>
                     {{range .}}
-                        <content class='col card mb-3 p-0'>
-                            <div class='card-body'>
+                        <content class='col-4 card mb-3 p-0'>
+                            <div class='card-body text-truncate'>
                                 <a href='/{{.URL}}' class='card-title stretched-link'>
-                                    <b class='text-body text-truncate'>{{.Name}}</b>
+                                    <b class='text-body'>{{.Name}}</b>
                                 </a>
                             </div>
                         </content>

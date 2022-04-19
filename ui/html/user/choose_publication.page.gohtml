@@ -5,9 +5,13 @@
 {{define "body"}}
     <h4>Choose publication</h4>
     {{if .ProfilePublications.WritesOn}}
-        <div class='list-group'>
-            {{range .ProfilePublications.WritesOn}}
-                <a class='list-group-item list-group-item-action py-3 fw-bold' href='/{{.URL}}/article'>{{.Name}}</a>
+        <div class='list-group text-truncate'>
+            {{range $publication := .ProfilePublications.WritesOn}}
+                <div class='position-relative d-inline-block list-group-item list-group-item-action py-4'
+                     title='{{$publication.Name}}'>
+                    <a class='fw-bold text-body stretched-link'
+                       href='{{$publication.GetBaseURL}}/article'>{{$publication.Name}}</a>
+                </div>
             {{end}}
         </div>
     {{else}}
