@@ -18,7 +18,7 @@ func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http
 		return
 	}
 
-	td.WriterMap, err = app.models.Users.GetArticleWriters(td.Articles)
+	td.UserMap, err = app.models.Users.GetArticleWriters(td.Articles)
 	if err != nil {
 		app.serverError(w, err)
 		return
@@ -48,6 +48,7 @@ func (app *application) handleCreateArticle(w http.ResponseWriter, r *http.Reque
 
 	form := forms.New(r.PostForm)
 	form.Required("content", "title")
+	form.MaxLength("title", 255)
 
 	if !form.Valid() {
 		app.render(w, r, "new_article.page.gohtml", &templateData{

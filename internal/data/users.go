@@ -335,7 +335,7 @@ func (m *UserModel) GetArticleWriters(articles []*Article) (map[int]*User, error
 	return users, nil
 }
 
-func (m *UserModel) Like(user *User, article *Article) error {
+func (m *UserModel) LikeArticle(user *User, article *Article) error {
 	query := `
 		INSERT INTO article_like (user_id, article_id)
 		VALUES ($1, $2)`
@@ -351,7 +351,7 @@ func (m *UserModel) Like(user *User, article *Article) error {
 	return nil
 }
 
-func (m *UserModel) Unlike(user *User, article *Article) error {
+func (m *UserModel) UnlikeArticle(user *User, article *Article) error {
 	query := `
 		DELETE FROM article_like
 		WHERE user_id = $1 AND article_id = $2`
@@ -360,6 +360,40 @@ func (m *UserModel) Unlike(user *User, article *Article) error {
 	defer cancel()
 
 	_, err := m.DB.ExecContext(ctx, query, user.ID, article.ID)
+	if err == sql.ErrNoRows {
+		return ErrRecordNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserModel) LikeComment(user *User, comment *Comment) error {
+	query := `
+		INSERT INTO comment_like (user_id, comment_id)
+		VALUES ($1, $2)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, user.ID, comment.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserModel) UnlikeComment(user *User, comment *Comment) error {
+	query := `
+		DELETE FROM comment_like
+		WHERE user_id = $1 AND comment_id = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, user.ID, comment.ID)
 	if err == sql.ErrNoRows {
 		return ErrRecordNotFound
 	} else if err != nil {

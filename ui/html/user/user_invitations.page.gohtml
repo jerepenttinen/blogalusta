@@ -18,13 +18,13 @@
                                     {{.Description}}
                                 </p>
                             </div>
-                            <div class='col' style='max-width: max-content'>
+                            <div class='col my-auto' style='max-width: max-content'>
                                 <form class='d-inline-block' action='/user/invitations/{{.ID}}/accept'
                                       method='post'>
                                     {{template "csrf" $}}
                                     <div class='position-relative d-inline-block'>
                                         <button class='btn btn-success btn-sm stretched-link' type='submit'>
-                                            Accept
+                                            <i class='bi-check'></i>&nbsp;Accept
                                         </button>
                                     </div>
                                 </form>
@@ -33,7 +33,7 @@
                                     {{template "csrf" $}}
                                     <div class='position-relative d-inline-block'>
                                         <button class='btn btn-danger btn-sm stretched-link' type='submit'>
-                                            Decline
+                                            <i class='bi-x'></i>&nbsp;Decline
                                         </button>
                                     </div>
                                 </form>

@@ -54,17 +54,29 @@
                                     <hr class='dropdown-divider'>
                                 </li>
                                 <li>
-                                    <a href='{{userURL .AuthenticatedUser}}' class='dropdown-item py-2'>Profile</a>
+                                    <a href='{{userURL .AuthenticatedUser}}' class='dropdown-item py-2'>
+                                        <i class='bi-person'></i>&nbsp;Profile
+                                    </a>
                                 </li>
-                                <li><a href='/user/invitations' class='dropdown-item py-2'>Invitations</a></li>
-                                <li><a href='/user/settings' class='dropdown-item py-2'>Settings</a></li>
+                                <li>
+                                    <a href='/user/invitations' class='dropdown-item py-2'>
+                                        <i class='bi-envelope'></i>&nbsp;Invitations
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href='/user/settings' class='dropdown-item py-2'>
+                                        <i class='bi-gear'></i>&nbsp;Settings
+                                    </a>
+                                </li>
                                 <li>
                                     <hr class='dropdown-divider'>
                                 </li>
                                 <li>
                                     <form action='/user/logout' method='post'>
                                         {{template "csrf" $}}
-                                        <button type='submit' class='dropdown-item py-2'>Logout</button>
+                                        <button type='submit' class='dropdown-item py-2'>
+                                            <i class='bi-box-arrow-in-left'></i>&nbsp;Logout
+                                        </button>
                                     </form>
                                 </li>
                             </ul>

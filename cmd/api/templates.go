@@ -29,14 +29,15 @@ type templateData struct {
 	IsWriter       bool
 	IsSubscribed   bool
 	Article        *data.Article
+	Comments       []*data.Comment
 	Articles       []*data.Article
 	HTML           template.HTML
 	Like           *data.Like
 
-	Metadata  data.Metadata
-	PubMap    map[int]*data.Publication
-	WriterMap map[int]*data.User
-	LikeMap   map[int]*data.Like
+	Metadata data.Metadata
+	PubMap   map[int]*data.Publication
+	UserMap  map[int]*data.User
+	LikeMap  map[int]*data.Like
 }
 
 func humanDate(t time.Time) string {

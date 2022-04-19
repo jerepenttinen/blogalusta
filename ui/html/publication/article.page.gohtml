@@ -15,6 +15,7 @@
         {{$publication := $.Publication}}
         {{$writer := $article.Writer}}
         {{$like := $.Like}}
+        {{$comments := $.Comments}}
         <div class='mt-5 mb-3 text-wrap fs-5 lh-base container'>
             <div class='row'>
                 <div class='col'><h1>{{$article.Title}}</h1></div>
@@ -34,7 +35,7 @@
                     </div>
                 </div>
                 <div class='col' style='max-width: max-content'>
-                    <div class='position-relative d-inline-block' title='Like'>
+                    <div class='position-relative d-inline-block me-2' title='Like'>
                         {{$end := "like"}}
                         {{if $like.HasLiked}}
                             {{$end = "unlike"}}
@@ -55,9 +56,13 @@
                     </div>
 
                     <div class='position-relative d-inline-block' title='Comments'>
-                        <a href='#comments' class='btn btn-link stretched-link'>
+                        <a href='#comments' class='btn btn-link stretched-link px-0'>
                             <i class='bi-chat fs-5'></i>
                         </a>
+                        {{$commentcount := len $comments}}
+                        {{if gt $commentcount 0}}
+                            <span class='fs-6 align-middle'>{{$commentcount}}</span>
+                        {{end}}
                     </div>
                 </div>
             </div>
@@ -66,7 +71,47 @@
             {{$.HTML}}
         </article>
         <section class='container' id='comments'>
-
+            {{range $comment := $comments}}
+                {{$commenter := (index $.UserMap $comment.CommenterID)}}
+                {{$like := (index $.LikeMap $comment.ID)}}
+                <section class='row'>
+                    <div class='col-1 position-relative d-inline-block' style='z-index: 3' title='Like'>
+                        {{$action := "like"}}
+                        {{if $like.HasLiked}}
+                            {{$action = "unlike"}}
+                        {{end}}
+                        <form action='{{$publication.GetArticleURL $article}}/{{$comment.ID}}/{{$action}}' class='text-center' method='post'>
+                            {{template "csrf" $}}
+                            <input type='hidden' name='page' value='{{$.Metadata.CurrentPage}}'>
+                            <button type='submit' class='btn btn-link stretched-link fs-5 p-0'>
+                                {{if $like.HasLiked}}
+                                    <i class='bi-hand-thumbs-up-fill'></i>
+                                {{else}}
+                                    <i class='bi-hand-thumbs-up'></i>
+                                {{end}}
+                            </button>
+                            <p class='fs-6'>{{formatNum $like.Count}}</p>
+                        </form>
+                    </div>
+                    <div class='col'>
+                        <div class='row align-items-center position-relative mb-2'>
+                            <div class='col-1 pe-0'>
+                                <img class='rounded-circle' src='{{userPic $commenter}}'
+                                     alt='Profile pic' width='32'>
+                            </div>
+                            <div class='col px-0'>
+                                <a href='{{userURL $commenter}}'
+                                   class='stretched-link px-0'>
+                                    <b class='text-body'>{{$commenter.Name}}</b>
+                                </a>
+                            </div>
+                        </div>
+                        <div>
+                            <pre>{{$comment.Content}}</pre>
+                        </div>
+                    </div>
+                </section>
+            {{end}}
         </section>
     {{end}}
 {{end}}

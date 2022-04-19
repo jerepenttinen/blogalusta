@@ -16,6 +16,7 @@ type Models struct {
 	Publications PublicationModel
 	Articles     ArticleModel
 	Images       ImageModel
+	Comments     CommentModel
 }
 
 func NewModels(db *sql.DB) Models {
@@ -24,5 +25,6 @@ func NewModels(db *sql.DB) Models {
 		Publications: PublicationModel{DB: db},
 		Articles:     ArticleModel{DB: db},
 		Images:       ImageModel{DB: db},
+		Comments:     CommentModel{DB: db},
 	}
 }

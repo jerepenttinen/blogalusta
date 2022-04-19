@@ -35,7 +35,7 @@
     {{if .Articles}}
         {{range $article := .Articles}}
             {{$publication := $.Publication}}
-            {{$writer := (index $.WriterMap $article.WriterID)}}
+            {{$writer := (index $.UserMap $article.WriterID)}}
             {{$like := (index $.LikeMap $article.ID)}}
             <section class='card border-0 rounded-0 pt-2 pb-2 container'>
                 <div class='card-body row'>
@@ -44,7 +44,7 @@
                         {{if $like.HasLiked}}
                             {{$action = "unlike"}}
                         {{end}}
-                        <form action='{{$publication.GetBaseURL}}/{{$action}}/{{$article.ID}}' class='text-center'
+                        <form action='{{$publication.GetBaseURL}}/{{$article.ID}}/{{$action}}' class='text-center'
                               method='post'>
                             {{template "csrf" $}}
                             <button type='submit' class='btn btn-link stretched-link fs-5 p-0'>

@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/justinas/nosurf"
 	"net/http"
+	"strconv"
 )
 
 import (
@@ -192,5 +193,26 @@ func (app *application) requireUserIsOwner(next http.Handler) http.Handler {
 		}
 
 		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) addCommentToContext(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		commentID, err := strconv.Atoi(chi.URLParam(r, "commentID"))
+		if err != nil {
+			app.clientError(w, http.StatusNotFound)
+			return
+		}
+		comment, err := app.models.Comments.Get(commentID)
+		if err == data.ErrRecordNotFound {
+			app.clientError(w, http.StatusNotFound)
+			return
+		} else if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextKeyComment, comment)
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

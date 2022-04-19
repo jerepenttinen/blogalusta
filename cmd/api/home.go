@@ -51,11 +51,11 @@ func (app *application) handleShowHomePage(w http.ResponseWriter, r *http.Reques
 	likeMap, err := app.models.Articles.LikesMany(articles, user)
 
 	app.render(w, r, "home.page.gohtml", &templateData{
-		Articles:  articles,
-		Metadata:  metaData,
-		PubMap:    pubs,
-		WriterMap: writers,
-		LikeMap:   likeMap,
+		Articles: articles,
+		Metadata: metaData,
+		PubMap:   pubs,
+		UserMap:  writers,
+		LikeMap:  likeMap,
 	})
 }
 
@@ -114,6 +114,28 @@ func (app *application) handleLikeArticleHome(w http.ResponseWriter, r *http.Req
 		app.clientError(w, http.StatusBadRequest)
 		return
 	}
+	err = r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	form.Required("page")
+
+	if !form.Valid() {
+		if form.Errors.Has("page") {
+			app.session.Put(r, "flash", form.Errors.Get("page"))
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	page, err := strconv.Atoi(form.Get("page"))
+	if err != nil {
+		app.clientError(w, http.StatusNotFound)
+		return
+	}
 
 	article, err := app.models.Articles.Get(articleID)
 	if err == data.ErrRecordNotFound {
@@ -129,7 +151,14 @@ func (app *application) handleLikeArticleHome(w http.ResponseWriter, r *http.Req
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	r.URL.Path = "/"
+	if page != 1 {
+		values := r.URL.Query()
+		values.Add("p", strconv.Itoa(page))
+		r.URL.RawQuery = values.Encode()
+	}
+
+	http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
 }
 
 func (app *application) handleUnlikeArticleHome(w http.ResponseWriter, r *http.Request) {
@@ -138,6 +167,29 @@ func (app *application) handleUnlikeArticleHome(w http.ResponseWriter, r *http.R
 	articleID, err := strconv.Atoi(chi.URLParam(r, "articleID"))
 	if err != nil {
 		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	form.Required("page")
+
+	if !form.Valid() {
+		if form.Errors.Has("page") {
+			app.session.Put(r, "flash", form.Errors.Get("page"))
+		}
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	page, err := strconv.Atoi(form.Get("page"))
+	if err != nil {
+		app.clientError(w, http.StatusNotFound)
 		return
 	}
 
@@ -155,5 +207,12 @@ func (app *application) handleUnlikeArticleHome(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	http.Redirect(w, r, "/", http.StatusSeeOther)
+	r.URL.Path = "/"
+	if page != 1 {
+		values := r.URL.Query()
+		values.Add("p", strconv.Itoa(page))
+		r.URL.RawQuery = values.Encode()
+	}
+
+	http.Redirect(w, r, r.URL.String(), http.StatusSeeOther)
 }

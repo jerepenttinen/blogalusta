@@ -35,6 +35,7 @@ var (
 	contextKeyPending     = contextKey("pending")
 	contextKeyArticle     = contextKey("article")
 	contextKeyProfile     = contextKey("profileUser")
+	contextKeyComment     = contextKey("comment")
 )
 
 type config struct {

@@ -147,6 +147,14 @@ func (app *application) pending(r *http.Request) []*data.User {
 	return pending
 }
 
+func (app *application) comment(r *http.Request) *data.Comment {
+	comment, ok := r.Context().Value(contextKeyComment).(*data.Comment)
+	if !ok {
+		return nil
+	}
+	return comment
+}
+
 func cropImage(img image.Image, crop image.Rectangle) (image.Image, error) {
 	type subImager interface {
 		SubImage(r image.Rectangle) image.Image
@@ -195,7 +203,7 @@ func (app *application) likeArticle(w http.ResponseWriter, user *data.User, arti
 		return errors.New("already liked")
 	}
 
-	err = app.models.Users.Like(user, article)
+	err = app.models.Users.LikeArticle(user, article)
 	if err != nil {
 		app.serverError(w, err)
 		return err
@@ -216,7 +224,7 @@ func (app *application) unlikeArticle(w http.ResponseWriter, user *data.User, ar
 		return errors.New("not liked")
 	}
 
-	err = app.models.Users.Unlike(user, article)
+	err = app.models.Users.UnlikeArticle(user, article)
 	if err != nil {
 		app.serverError(w, err)
 		return err

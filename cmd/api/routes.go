@@ -15,8 +15,8 @@ func (app *application) routes() *chi.Mux {
 
 	r.With(dynamic...).Get("/", app.handleShowHomePage)
 
-	r.With(dynamic...).With(app.requireAuthenticatedUser).Post("/like/{articleID:[0-9]+}", app.handleLikeArticleHome)
-	r.With(dynamic...).With(app.requireAuthenticatedUser).Post("/unlike/{articleID:[0-9]+}", app.handleUnlikeArticleHome)
+	r.With(dynamic...).With(app.requireAuthenticatedUser).Post("/{articleID:[0-9]+}/like", app.handleLikeArticleHome)
+	r.With(dynamic...).With(app.requireAuthenticatedUser).Post("/{articleID:[0-9]+}/unlike", app.handleUnlikeArticleHome)
 
 	r.Get("/img/{imageID:[0-9]+}.jpg", app.handleGetImage)
 	r.Get("/img/0.jpg", app.handleGetDefaultImage)
@@ -54,8 +54,8 @@ func (app *application) routes() *chi.Mux {
 			r.Use(app.requireAuthenticatedUser)
 			r.Post("/subscribe", app.handleSubscribe)
 			r.Post("/unsubscribe", app.handleUnsubscribe)
-			r.Post("/like/{articleID:[0-9]+}", app.handleLikeArticlePublication)
-			r.Post("/unlike/{articleID:[0-9]+}", app.handleUnlikeArticlePublication)
+			r.Post("/{articleID:[0-9]+}/like", app.handleLikeArticlePublication)
+			r.Post("/{articleID:[0-9]+}/unlike", app.handleUnlikeArticlePublication)
 
 			r.Route("/", func(r chi.Router) {
 				r.Use(app.requireUserIsWriter)
@@ -66,8 +66,8 @@ func (app *application) routes() *chi.Mux {
 					r.Use(app.requireUserIsOwner)
 					r.Get("/settings", app.handleShowPublicationSettingsPage)
 					r.Post("/invite", app.handleInviteWriter)
-					r.Post("/withdraw/{userID:[0-9]+}", app.handleWithdrawInvitation)
-					r.Post("/kick/{userID:[0-9]+}", app.handleKickWriter)
+					r.Post("/{userID:[0-9]+}/withdraw", app.handleWithdrawInvitation)
+					r.Post("/{userID:[0-9]+}/kick", app.handleKickWriter)
 					r.Post("/delete", app.handleDeletePublication)
 				})
 			})
@@ -80,7 +80,12 @@ func (app *application) routes() *chi.Mux {
 				r.Post("/like", app.handleLikeArticle)
 				r.Post("/unlike", app.handleUnlikeArticle)
 				r.Post("/comment", app.handleCreateComment)
-				r.Post("/delete/{commentID:[0-9]+}", app.handleDeleteComment)
+				r.Route("/{commentID:[0-9]+}", func(r chi.Router) {
+					r.Use(app.addCommentToContext)
+					r.Post("/delete", app.handleDeleteComment)
+					r.Post("/like", app.handleLikeComment)
+					r.Post("/unlike", app.handleUnlikeComment)
+				})
 
 				// r.Route("/", func(r chi.Router) {
 				// 	r.Use(app.requireUserIsOwner)
