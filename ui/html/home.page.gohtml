@@ -18,9 +18,10 @@
                         {{$action = "unlike"}}
                     {{end}}
                     <div class='col-1 my-auto position-relative d-inline-block' style='z-index: 3' title='{{$action}}'>
-                        <form action='{{$publication.GetBaseURL}}/{{$article.ID}}/{{$action}}' class='text-center'
+                        <form action='/{{$article.ID}}/{{$action}}' class='text-center'
                               method='post'>
                             {{template "csrf" $}}
+                            <input type='hidden' name='page' value='{{$.Metadata.CurrentPage}}'>
                             <button type='submit' class='btn btn-link stretched-link fs-5 p-0'>
                                 {{if $like.HasLiked}}
                                     <i class='bi-hand-thumbs-up-fill'></i>
