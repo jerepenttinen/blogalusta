@@ -16,6 +16,7 @@
         {{$writer := $article.Writer}}
         {{$like := $.Like}}
         {{$comments := $.Comments}}
+        {{$user := $.AuthenticatedUser}}
         <div class='mt-5 mb-3 text-wrap fs-5 lh-base container'>
             <div class='row'>
                 <div class='col'><h1>{{$article.Title}}</h1></div>
@@ -67,14 +68,23 @@
                 </div>
             </div>
         </div>
-        <article class='container md'>
+        <article class='container md mb-5 pb-5'>
             {{$.HTML}}
         </article>
         <section class='container' id='comments'>
+            {{if $user}}
+                <div class='section'>
+                    <form action='{{$publication.GetArticleURL $article}}/comment' class='mb-3' method='post'>
+                        {{template "csrf" $}}
+                        <textarea class='form-control mb-3' name='content' id='content-input' rows='5' placeholder='Comment' required></textarea>
+                        <button type='submit' class='btn btn-primary'>Comment</button>
+                    </form>
+                </div>
+            {{end}}
             {{range $comment := $comments}}
                 {{$commenter := (index $.UserMap $comment.CommenterID)}}
                 {{$like := (index $.LikeMap $comment.ID)}}
-                <section class='row'>
+                <section class='row mb-3'>
                     <div class='col-1 position-relative d-inline-block' style='z-index: 3' title='Like'>
                         {{$action := "like"}}
                         {{if $like.HasLiked}}
@@ -104,6 +114,9 @@
                                    class='stretched-link px-0'>
                                     <b class='text-body'>{{$commenter.Name}}</b>
                                 </a>
+                                <div title='{{rfc3339 $comment.CreatedAt}}' class='position-relative d-inline-block'>
+                                    <time datetime='{{rfc3339 $comment.CreatedAt}}' class='stretched-link fs-6'>{{humanDate $comment.CreatedAt}}</time>
+                                </div>
                             </div>
                         </div>
                         <div>

@@ -28,7 +28,7 @@ func (app *application) handleShowHomePage(w http.ResponseWriter, r *http.Reques
 	filters.Page = page
 	filters.PageSize = 10
 
-	articles, metaData, err := app.models.Articles.GetNewestArticles(filters)
+	articles, metaData, err := app.models.Articles.Articles(filters)
 	if err == data.ErrRecordNotFound {
 		app.clientError(w, http.StatusNotFound)
 		return
@@ -49,13 +49,24 @@ func (app *application) handleShowHomePage(w http.ResponseWriter, r *http.Reques
 
 	user := app.authenticatedUser(r)
 	likeMap, err := app.models.Articles.LikesMany(articles, user)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	commentCountMap, err := app.models.Comments.Counts(articles)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
 	app.render(w, r, "home.page.gohtml", &templateData{
-		Articles: articles,
-		Metadata: metaData,
-		PubMap:   pubs,
-		UserMap:  writers,
-		LikeMap:  likeMap,
+		Articles:        articles,
+		Metadata:        metaData,
+		PubMap:          pubs,
+		UserMap:         writers,
+		LikeMap:         likeMap,
+		CommentCountMap: commentCountMap,
 	})
 }
 

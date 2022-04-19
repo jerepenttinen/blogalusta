@@ -111,11 +111,14 @@ func (m *ArticleModel) GetArticlesOfPublication(publication *Publication) ([]*Ar
 	return articles, nil
 }
 
-func (m *ArticleModel) GetNewestArticles(filters Filters) ([]*Article, Metadata, error) {
+func (m *ArticleModel) Articles(filters Filters) ([]*Article, Metadata, error) {
 	query := `
-		SELECT count(*) OVER(), id, title, content, publication_id, writer_id, created_at, version
+		SELECT count(*) OVER(), id, title, content, publication_id, writer_id, created_at, version, count(al.article_id) as likes
 		FROM article
-		ORDER BY created_at DESC
+		LEFT JOIN article_like al on article.id = al.article_id
+		WHERE created_at > now() - INTERVAL '1 week'
+		GROUP BY id
+		ORDER BY likes DESC, id DESC
 		LIMIT $1 OFFSET $2`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -132,7 +135,8 @@ func (m *ArticleModel) GetNewestArticles(filters Filters) ([]*Article, Metadata,
 
 	for rows.Next() {
 		a := &Article{}
-		err = rows.Scan(&totalRecords, &a.ID, &a.Title, &a.Content, &a.PublicationID, &a.WriterID, &a.CreatedAt, &a.Version)
+		var likes int
+		err = rows.Scan(&totalRecords, &a.ID, &a.Title, &a.Content, &a.PublicationID, &a.WriterID, &a.CreatedAt, &a.Version, &likes)
 		if err != nil {
 			return nil, Metadata{}, err
 		}
@@ -219,4 +223,20 @@ func (m *ArticleModel) UserHasLiked(article *Article, user *User) (bool, error) 
 	}
 
 	return exists == 1, nil
+}
+
+func (m *ArticleModel) Comment(article *Article, user *User, comment string) error {
+	query := `
+		INSERT INTO comment (commenter_id, article_id, content)
+		VALUES ($1, $2, $3)`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, user.ID, article.ID, comment)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

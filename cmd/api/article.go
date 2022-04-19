@@ -1,6 +1,7 @@
 package main
 
 import (
+	"blogalusta/internal/forms"
 	"net/http"
 )
 
@@ -66,8 +67,29 @@ func (app *application) handleUnlikeArticle(w http.ResponseWriter, r *http.Reque
 func (app *application) handleCreateComment(w http.ResponseWriter, r *http.Request) {
 	article := app.article(r)
 	publication := app.publication(r)
+	user := app.authenticatedUser(r)
 
-	http.Redirect(w, r, publication.GetArticleURL(article), http.StatusSeeOther)
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	form.Required("content")
+
+	if !form.Valid() {
+		app.session.Put(r, "flash", form.Get("content"))
+		return
+	}
+
+	err = app.models.Articles.Comment(article, user, form.Get("content"))
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	http.Redirect(w, r, publication.GetArticleURL(article)+"#comments", http.StatusSeeOther)
 }
 
 func (app *application) handleDeleteComment(w http.ResponseWriter, r *http.Request) {

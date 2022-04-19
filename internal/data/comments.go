@@ -46,7 +46,7 @@ func (m *CommentModel) Get(commentID int) (*Comment, error) {
 	return c, nil
 }
 
-func (m *CommentModel) Count(article *Comment) (int, error) {
+func (m *CommentModel) Count(article *Article) (int, error) {
 	query := `
 		SELECT COUNT(*)
 		FROM comment
@@ -73,7 +73,7 @@ func (m *CommentModel) Retrieve(article *Article) ([]*Comment, error) {
 		LEFT JOIN comment_like cl on comment.id = cl.comment_id
 		WHERE article_id = $1
 		GROUP BY id
-		ORDER BY likes DESC`
+		ORDER BY likes DESC, id DESC`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
 	defer cancel()
@@ -203,4 +203,23 @@ func (m *CommentModel) UserHasLiked(comment *Comment, user *User) (bool, error) 
 	}
 
 	return exists == 1, nil
+}
+
+func (m *CommentModel) Counts(articles []*Article) (map[int]int, error) {
+	counts := make(map[int]int)
+
+	for _, article := range articles {
+		if _, ok := counts[int(article.ID)]; ok {
+			continue
+		}
+
+		count, err := m.Count(article)
+
+		if err != nil {
+			return nil, err
+		}
+		counts[int(article.ID)] = count
+	}
+
+	return counts, nil
 }

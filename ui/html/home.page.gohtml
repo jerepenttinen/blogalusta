@@ -4,11 +4,12 @@
 
 {{define "body"}}
     {{if .Articles}}
-        <h3>Newest articles</h3>
+        <h3>Top articles past week</h3>
         {{range $article := .Articles}}
             {{$publication := (index $.PubMap $article.PublicationID)}}
             {{$writer := (index $.UserMap $article.WriterID)}}
             {{$like := (index $.LikeMap $article.ID)}}
+            {{$commentcount := (index $.CommentCountMap $article.ID)}}
 
             <section class='card border-0 rounded-0 pt-2 pb-2 container'>
                 <div class='card-body row'>
@@ -52,7 +53,12 @@
                             </a>
                         </div>
                         &nbsp;
-                        <i class='bi-chat fs-6'></i>
+                        {{if gt $commentcount 0}}
+                            <div class='card-text position-relative d-inline-block'>
+                                <i class='bi-chat fs-6'></i>
+                                <span>{{$commentcount}}</span>
+                            </div>
+                        {{end}}
                     </div>
                 </div>
             </section>

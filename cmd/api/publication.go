@@ -26,6 +26,16 @@ func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http
 
 	user := app.authenticatedUser(r)
 	td.LikeMap, err = app.models.Articles.LikesMany(td.Articles, user)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	td.CommentCountMap, err = app.models.Comments.Counts(td.Articles)
+	if err != nil {
+		app.serverError(w, err)
+		return
+	}
 
 	app.render(w, r, "publication.page.gohtml", td)
 }
