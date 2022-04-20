@@ -48,7 +48,7 @@ func (app *application) handleSignup(w http.ResponseWriter, r *http.Request) {
 
 	email, _ := mail.ParseAddress(form.Get("email"))
 
-	err = app.models.Users.Insert(form.Get("name"), email.Address, form.Get("password"))
+	id, err := app.models.Users.Insert(form.Get("name"), email.Address, form.Get("password"))
 	if err == data.ErrDuplicateRecord {
 		app.session.Put(r, "flash_error", "Email address already in use")
 		app.render(w, r, "signup.page.gohtml", &templateData{Form: form})
@@ -59,7 +59,8 @@ func (app *application) handleSignup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
-	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+	app.session.Put(r, "userID", id)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (app *application) handleShowLoginPage(w http.ResponseWriter, r *http.Request) {

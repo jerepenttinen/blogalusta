@@ -31,30 +31,32 @@ type UserModel struct {
 	DB *sql.DB
 }
 
-func (m *UserModel) Insert(name, email, password string) error {
+func (m *UserModel) Insert(name, email, password string) (int, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
 	query := `
 		INSERT INTO users (name, email, password_hash)
-		VALUES ($1, $2, $3)`
+		VALUES ($1, $2, $3)
+		RETURNING id`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err = m.DB.ExecContext(ctx, query, name, email, hashedPassword)
+	id := 0
+	err = m.DB.QueryRowContext(ctx, query, name, email, hashedPassword).Scan(&id)
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return ErrDuplicateRecord
+			return 0, ErrDuplicateRecord
 		default:
-			return err
+			return 0, err
 		}
 	}
 
-	return nil
+	return id, nil
 }
 
 func (m *UserModel) Authenticate(email, password string) (int, error) {
