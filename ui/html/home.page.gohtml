@@ -3,9 +3,9 @@
 {{define "title"}}Home{{end}}
 
 {{define "body"}}
-    {{if .Articles}}
+    {{with $articles := .Articles}}
         <h3 class='mt-2'>Top articles past week</h3>
-        {{range $article := .Articles}}
+        {{range $article := $articles}}
             {{$publication := (index $.PubMap $article.PublicationID)}}
             {{$writer := (index $.UserMap $article.WriterID)}}
             {{$like := (index $.LikeMap $article.ID)}}
@@ -17,7 +17,8 @@
                     {{if $like.HasLiked}}
                         {{$action = "unlike"}}
                     {{end}}
-                    <div class='col col-auto my-auto position-relative d-inline-block px-2' style='z-index: 3' title='{{$action}}'>
+                    <div class='col col-auto my-auto position-relative d-inline-block px-2' style='z-index: 3'
+                         title='{{$action}}'>
                         <form action='/{{$article.ID}}/{{$action}}' class='text-center'
                               method='post'>
                             {{template "csrf" $}}
@@ -43,7 +44,8 @@
                                  style='max-width: 48ch' title='{{$writer.Name}}'>
                                 <div class='row mx-0'>
                                     <div class='col col-auto px-0 me-2'>
-                                        <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic' width='32'>
+                                        <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic'
+                                             width='32'>
                                     </div>
                                     <div class='col my-auto px-0'>
                                         <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
@@ -76,7 +78,9 @@
             </section>
         {{end}}
         <br>
-        {{template "pager" .Metadata}}
+        {{if ne $.Metadata.FirstPage $.Metadata.LastPage}}
+            {{template "pager" $.Metadata}}
+        {{end}}
     {{else}}
         <h1>Coming soon</h1>
     {{end}}
