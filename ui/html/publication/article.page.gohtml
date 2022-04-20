@@ -17,53 +17,61 @@
         {{$like := $.Like}}
         {{$comments := $.Comments}}
         {{$user := $.AuthenticatedUser}}
-        <div class='mt-5 mb-3 text-wrap fs-5 lh-base container'>
-            <div class='row text-break'>
+        <div class='col container mb-3'>
+            <div class='text-break text-wrap' title='{{$article.Title}}'>
                 <h1>{{$article.Title}}</h1>
             </div>
-            <div class='row justify-content-between'>
-                <div class='col fs-6'>
-                    <div class='position-relative d-inline-block'>
-                        <img class='rounded-circle' src='{{userPic .Writer}}' alt='Profile pic' width='44'>
-                        &nbsp;
-                        <a href='{{userURL .Writer}}' class='stretched-link'>
-                            {{.Writer.Name}}
-                        </a>
-                    </div>
-                    &nbsp;
-                    <div title='{{rfc3339 .CreatedAt}}' class='position-relative d-inline-block'>
-                        <time datetime='{{rfc3339 .CreatedAt}}' class='stretched-link'>{{humanDate .CreatedAt}}</time>
+            <div class='row mx-0 justify-content-between'>
+                <div class='col col-auto px-0 me-2 card-text position-relative d-inline-block' title='{{$writer.Name}}'>
+                    <div class='row mx-0'>
+                        <div class='col col-auto px-0 me-2'>
+                            <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic'
+                                 width='44'>
+                        </div>
+                        <div class='col my-auto px-0 me-1 text-truncate' style='max-width: 48ch'>
+                            <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
+                        </div>
+                        <div class='col col-auto px-0 d-inline-flex my-auto'>
+                            <div title='{{rfc3339 $article.CreatedAt}}'
+                                 style='display: block; cursor: pointer'
+                                 class='card-text position-relative me-2'>
+                                <time datetime='{{rfc3339 $article.CreatedAt}}'
+                                      class='stretched-link'>{{humanDate $article.CreatedAt}}</time>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class='col' style='max-width: max-content'>
-                    <div class='position-relative d-inline-block me-2' title='Like'>
-                        {{$end := "like"}}
-                        {{if $like.HasLiked}}
-                            {{$end = "unlike"}}
-                        {{end}}
-                        <form action='{{$publication.GetArticleURL .}}/{{$end}}' method='post'>
-                            {{template "csrf" $}}
-                            <button type='submit' class='btn btn-link stretched-link px-0'>
-                                {{if $like.HasLiked}}
-                                    <i class='bi-hand-thumbs-up-fill fs-5'></i>
-                                {{else}}
-                                    <i class='bi-hand-thumbs-up fs-5'></i>
-                                {{end}}
-                            </button>
-                            {{if gt $like.Count 0}}
-                                <span class='fs-6 align-middle'>{{$like.Count}}</span>
+                <div class='col col-auto'>
+                    <div class='align-self-end'>
+                        <div class='position-relative d-inline-block me-2' title='Like'>
+                            {{$end := "like"}}
+                            {{if $like.HasLiked}}
+                                {{$end = "unlike"}}
                             {{end}}
-                        </form>
-                    </div>
+                            <form action='{{$publication.GetArticleURL .}}/{{$end}}' method='post'>
+                                {{template "csrf" $}}
+                                <button type='submit' class='btn btn-link stretched-link px-0'>
+                                    {{if $like.HasLiked}}
+                                        <i class='bi-hand-thumbs-up-fill fs-5'></i>
+                                    {{else}}
+                                        <i class='bi-hand-thumbs-up fs-5'></i>
+                                    {{end}}
+                                </button>
+                                {{if gt $like.Count 0}}
+                                    <span class='fs-6 align-middle'>{{$like.Count}}</span>
+                                {{end}}
+                            </form>
+                        </div>
 
-                    <div class='position-relative d-inline-block' title='Comments'>
-                        <a href='#comments' class='btn btn-link stretched-link px-0'>
-                            <i class='bi-chat fs-5'></i>
-                        </a>
-                        {{$commentcount := len $comments}}
-                        {{if gt $commentcount 0}}
-                            <span class='fs-6 align-middle'>{{$commentcount}}</span>
-                        {{end}}
+                        <div class='position-relative d-inline-block' title='Comments'>
+                            <a href='#comments' class='btn btn-link stretched-link px-0'>
+                                <i class='bi-chat fs-5'></i>
+                            </a>
+                            {{$commentcount := len $comments}}
+                            {{if gt $commentcount 0}}
+                                <span class='fs-6 align-middle'>{{$commentcount}}</span>
+                            {{end}}
+                        </div>
                     </div>
                 </div>
             </div>
@@ -76,7 +84,8 @@
                 <div class='section'>
                     <form action='{{$publication.GetArticleURL $article}}/comment' class='mb-3' method='post'>
                         {{template "csrf" $}}
-                        <textarea class='form-control mb-3' name='content' id='content-input' rows='5' placeholder='Comment' required></textarea>
+                        <textarea class='form-control mb-3' name='content' id='content-input' rows='5'
+                                  placeholder='Comment' required></textarea>
                         <button type='submit' class='btn btn-primary'>Comment</button>
                     </form>
                 </div>
@@ -90,7 +99,8 @@
                         {{if $like.HasLiked}}
                             {{$action = "unlike"}}
                         {{end}}
-                        <form action='{{$publication.GetArticleURL $article}}/{{$comment.ID}}/{{$action}}' class='text-center' method='post'>
+                        <form action='{{$publication.GetArticleURL $article}}/{{$comment.ID}}/{{$action}}'
+                              class='text-center' method='post'>
                             {{template "csrf" $}}
                             <input type='hidden' name='page' value='{{$.Metadata.CurrentPage}}'>
                             <button type='submit' class='btn btn-link stretched-link fs-5 p-0'>
@@ -103,19 +113,46 @@
                             <p class='fs-6'>{{formatNum $like.Count}}</p>
                         </form>
                     </div>
-                    <div class='col'>
-                        <div class='row align-items-center position-relative mb-2'>
-                            <div class='col-1 pe-0'>
-                                <img class='rounded-circle' src='{{userPic $commenter}}'
-                                     alt='Profile pic' width='32'>
-                            </div>
-                            <div class='col px-0'>
-                                <a href='{{userURL $commenter}}'
-                                   class='stretched-link px-0'>
-                                    <b class='text-body'>{{$commenter.Name}}</b>
-                                </a>
-                                <div title='{{rfc3339 $comment.CreatedAt}}' class='position-relative d-inline-block'>
-                                    <time datetime='{{rfc3339 $comment.CreatedAt}}' class='stretched-link fs-6'>{{humanDate $comment.CreatedAt}}</time>
+{{/*                    <div class='col'>*/}}
+{{/*                        <div class='row align-items-center position-relative mb-2'>*/}}
+{{/*                            <div class='col-1 pe-0'>*/}}
+{{/*                                <img class='rounded-circle' src='{{userPic $commenter}}'*/}}
+{{/*                                     alt='Profile pic' width='32'>*/}}
+{{/*                            </div>*/}}
+{{/*                            <div class='col px-0'>*/}}
+{{/*                                <a href='{{userURL $commenter}}'*/}}
+{{/*                                   class='stretched-link px-0'>*/}}
+{{/*                                    <b class='text-body'>{{$commenter.Name}}</b>*/}}
+{{/*                                </a>*/}}
+{{/*                                <div title='{{rfc3339 $comment.CreatedAt}}' class='position-relative d-inline-block'>*/}}
+{{/*                                    <time datetime='{{rfc3339 $comment.CreatedAt}}'*/}}
+{{/*                                          class='stretched-link fs-6'>{{humanDate $comment.CreatedAt}}</time>*/}}
+{{/*                                </div>*/}}
+{{/*                            </div>*/}}
+{{/*                        </div>*/}}
+{{/*                        <div class='text-break text-wrap'>*/}}
+{{/*                            <p>{{$comment.Content}}</p>*/}}
+{{/*                        </div>*/}}
+{{/*                    </div>*/}}
+                    <div class='col container mb-3'>
+                        <div class='row mx-0 justify-content-between'>
+                            <div class='col col-auto px-0 me-2 card-text position-relative d-inline-block' title='{{$commenter.Name}}'>
+                                <div class='row mx-0'>
+                                    <div class='col col-auto px-0 me-2'>
+                                        <img class='rounded-circle' src='{{userPic $commenter}}' alt='Profile pic'
+                                             width='32'>
+                                    </div>
+                                    <div class='col my-auto px-0 me-1 text-truncate' style='max-width: 48ch'>
+                                        <a href='{{userURL $commenter}}' class='stretched-link'>{{$commenter.Name}}</a>
+                                    </div>
+                                    <div class='col col-auto px-0 d-inline-flex my-auto'>
+                                        <div title='{{rfc3339 $comment.CreatedAt}}'
+                                             style='display: block; cursor: pointer'
+                                             class='card-text position-relative me-2'>
+                                            <time datetime='{{rfc3339 $comment.CreatedAt}}'
+                                                  class='stretched-link'>{{humanDate $comment.CreatedAt}}</time>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
