@@ -9,7 +9,7 @@ import (
 func (app *application) routes() *chi.Mux {
 	r := chi.NewRouter()
 
-	r.Use(app.recoverPanic, app.logRequest, secureHeaders)
+	r.Use(app.recoverPanic, app.logRequest, app.secureHeaders)
 
 	dynamic := []func(http.Handler) http.Handler{app.session.Enable, noSurf, app.authenticate}
 

@@ -39,7 +39,8 @@ var (
 )
 
 type config struct {
-	port int
+	port    int
+	useHsts bool
 
 	db struct {
 		dsn          string
@@ -73,6 +74,7 @@ func main() {
 	flag.IntVar(&cfg.port, "port", getEnvInt("PORT", 4000), "API server port")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
 	secret := flag.String("secret", os.Getenv("SESSION_SECRET"), "Session secret key")
+	flag.BoolVar(&cfg.useHsts, "hsts", true, "Upgrade to https automatically")
 
 	// Heroku free DB has max 20 connections
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 20, "PostgreSQL max open connections")
