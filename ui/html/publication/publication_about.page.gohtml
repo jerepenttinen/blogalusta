@@ -45,7 +45,12 @@
         <b class='mb-3'>Writers</b>
         <div class='row row-cols-md-2 gap-3 mt-3'>
             {{range $writer := .Writers}}
-                <section class='col card border-0 px-0' style='margin: -0.25em -0.25em' title='{{$writer.Name}}'>
+                {{$isowner := (eq $writer.ID $.Publication.OwnerID)}}
+                {{$title := $writer.Name}}
+                {{if $isowner}}
+                    {{$title = join "Owner " $title}}
+                {{end}}
+                <section class='col card border-0 px-0' style='margin: -0.25em -0.25em' title='{{$title}}'>
                     <div class='card-body text-truncate'>
                         <img class='rounded-circle me-4' src='{{userPic $writer}}'
                              alt='Profile pic' width='92'>

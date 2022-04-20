@@ -112,6 +112,10 @@ func formatNum(num int) string {
 	return strconv.Itoa(num)
 }
 
+func join(a, b string) string {
+	return a + b
+}
+
 var functions = template.FuncMap{
 	"humanDate": humanDate,
 	"rfc3339":   rfc3339,
@@ -121,6 +125,7 @@ var functions = template.FuncMap{
 	"add":       add,
 	"seq":       seq,
 	"formatNum": formatNum,
+	"join":      join,
 }
 
 func newTemplateCache(dir string) (map[string]*template.Template, error) {
