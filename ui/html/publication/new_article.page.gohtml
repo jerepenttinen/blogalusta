@@ -8,10 +8,12 @@
     </li>
 {{end}}
 
+{{define "extralinks"}}
+    <link rel="stylesheet" href="/static/css/easymde.min.css">
+{{end}}
+
 {{define "body"}}
     {{with .Publication}}
-        <link rel="stylesheet" href="https://unpkg.com/easymde/dist/easymde.min.css">
-        <script src="https://unpkg.com/easymde/dist/easymde.min.js"></script>
         <form action='/{{.URL}}/article' method='post' id='form' style='margin-top: 5px;'>
             {{template "csrf" $}}
             {{with $.Form}}
@@ -23,11 +25,13 @@
                     <textarea name='content'
                               id="content-input"
                               rows='30'
+                              class=''
                     >{{.Get "content"}}</textarea>
                 </div>
             {{end}}
         </form>
 
+        <script src='/static/js/easymde.min.js'></script>
         <script>
             const easyMDE = new EasyMDE({element: document.getElementById('content-input')});
         </script>
