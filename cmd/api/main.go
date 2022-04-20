@@ -74,7 +74,7 @@ func main() {
 	flag.IntVar(&cfg.port, "port", getEnvInt("PORT", 4000), "API server port")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
 	secret := flag.String("secret", os.Getenv("SESSION_SECRET"), "Session secret key")
-	flag.BoolVar(&cfg.useHsts, "hsts", true, "Upgrade to https automatically")
+	flag.BoolVar(&cfg.useHsts, "hsts", getEnvBool("USE_HSTS", false), "Upgrade to https automatically")
 
 	// Heroku free DB has max 20 connections
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 20, "PostgreSQL max open connections")
@@ -135,6 +135,9 @@ func main() {
 	}
 
 	infoLog.Printf("starting server on port %d\n", app.config.port)
+	if app.config.useHsts {
+		infoLog.Println("using hsts")
+	}
 	err = app.serve()
 	if err != nil {
 		errorLog.Fatal(err)

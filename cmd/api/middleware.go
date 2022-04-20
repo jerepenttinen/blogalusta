@@ -3,6 +3,7 @@ package main
 import (
 	"blogalusta/internal/data"
 	"context"
+	"github.com/a-h/hsts"
 	"github.com/go-chi/chi/v5"
 	"github.com/justinas/nosurf"
 	"net/http"
@@ -18,10 +19,8 @@ func (app *application) secureHeaders(next http.Handler) http.Handler {
 		w.Header().Set("X-XSS-Protection", "1; mode=block")
 		w.Header().Set("X-Frame-Options", "deny")
 
-		if app.config.useHsts && r.URL.Scheme == "http" {
-			w.Header().Set("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
-			r.URL.Scheme = "https"
-			http.Redirect(w, r, r.URL.String(), http.StatusMovedPermanently)
+		if app.config.useHsts {
+			hsts.NewHandler(next).ServeHTTP(w, r)
 		} else {
 			next.ServeHTTP(w, r)
 		}
