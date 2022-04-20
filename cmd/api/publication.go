@@ -150,14 +150,14 @@ func (app *application) handleInviteWriter(w http.ResponseWriter, r *http.Reques
 	form.ValidEmail("email")
 
 	if !form.Valid() {
-		app.session.Put(r, "flash", "Invalid email")
+		app.session.Put(r, "flash_error", "Invalid email")
 		http.Redirect(w, r, publication.GetSettingsURL(), http.StatusSeeOther)
 		return
 	}
 
 	invited, err := app.models.Users.GetByEmail(form.Get("email"))
 	if err != nil {
-		app.session.Put(r, "flash", "User with this email not found")
+		app.session.Put(r, "flash_error", "User with this email not found")
 		http.Redirect(w, r, publication.GetSettingsURL(), http.StatusSeeOther)
 		return
 	}
@@ -169,14 +169,14 @@ func (app *application) handleInviteWriter(w http.ResponseWriter, r *http.Reques
 	}
 
 	if isWriter {
-		app.session.Put(r, "flash", "This user is already a writer here!")
+		app.session.Put(r, "flash_error", "This user is already a writer here!")
 		http.Redirect(w, r, publication.GetSettingsURL(), http.StatusSeeOther)
 		return
 	}
 
 	err = app.models.Publications.Invite(publication, invited)
 	if err == data.ErrDuplicateRecord {
-		app.session.Put(r, "flash", "This user is already invited!")
+		app.session.Put(r, "flash_error", "This user is already invited!")
 		http.Redirect(w, r, publication.GetSettingsURL(), http.StatusSeeOther)
 		return
 	} else if err != nil {

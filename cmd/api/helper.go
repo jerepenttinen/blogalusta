@@ -62,6 +62,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.CSRFToken = nosurf.Token(r)
 	td.CurrentYear = time.Now().Year()
 	td.Flash = app.session.PopString(r, "flash")
+	td.FlashError = app.session.PopString(r, "flash_error")
 	td.AuthenticatedUser = app.authenticatedUser(r)
 	td.Publication = app.publication(r)
 	td.Article = app.article(r)

@@ -79,7 +79,7 @@ func (app *application) handleCreateComment(w http.ResponseWriter, r *http.Reque
 	form.Required("content")
 
 	if !form.Valid() {
-		app.session.Put(r, "flash", form.Get("content"))
+		app.session.Put(r, "flash_error", form.Errors.Get("content"))
 		return
 	}
 

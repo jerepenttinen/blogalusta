@@ -136,7 +136,7 @@ func (app *application) handleLikeArticleHome(w http.ResponseWriter, r *http.Req
 
 	if !form.Valid() {
 		if form.Errors.Has("page") {
-			app.session.Put(r, "flash", form.Errors.Get("page"))
+			app.session.Put(r, "flash_error", form.Errors.Get("page"))
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -192,7 +192,7 @@ func (app *application) handleUnlikeArticleHome(w http.ResponseWriter, r *http.R
 
 	if !form.Valid() {
 		if form.Errors.Has("page") {
-			app.session.Put(r, "flash", form.Errors.Get("page"))
+			app.session.Put(r, "flash_error", form.Errors.Get("page"))
 		}
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return

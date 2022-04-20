@@ -1,5 +1,7 @@
 package forms
 
+import "fmt"
+
 type errors map[string][]string
 
 func (e errors) Add(field, message string) {
@@ -17,4 +19,8 @@ func (e errors) Get(field string) string {
 func (e errors) Has(field string) bool {
 	_, ok := e[field]
 	return ok
+}
+
+func (e errors) All() string {
+	return fmt.Sprintf("%v", e)
 }

@@ -36,11 +36,16 @@ func (app *application) routes() *chi.Mux {
 			r.Post("/publication/create", app.handleCreatePublication)
 			r.Post("/publication/{id:[0-9]+}/leave", app.handleLeavePublication)
 			r.Get("/article", app.handleShowChoosePublicationPage)
-			r.Get("/settings", app.handleShowUserSettingsPage)
-			r.Post("/image", app.handleChangeUserProfilePicture)
 			r.Get("/invitations", app.handleShowUserInvitationsPage)
 			r.Post("/invitations/{id:[0-9]+}/accept", app.handleAcceptInvitation)
 			r.Post("/invitations/{id:[0-9]+}/decline", app.handleDeclineInvitation)
+
+			r.Route("/settings", func(r chi.Router) {
+				r.Get("/", app.handleShowUserSettingsPage)
+				r.Post("/picture", app.handleChangeUserProfilePicture)
+				r.Post("/name", app.handleChangeUserName)
+				r.Post("/password", app.handleChangeUserPassword)
+			})
 		})
 	})
 

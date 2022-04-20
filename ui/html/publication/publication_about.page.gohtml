@@ -14,21 +14,15 @@
     <div class='container' style="margin-top:-1em">
         <ul class='nav justify-content-md-center'>
             <li class='nav-item'>
-                <a href='/{{.Publication.URL}}' class='nav-link'>
-                    Articles
-                </a>
+                <a href='/{{.Publication.URL}}' class='nav-link'>Articles</a>
             </li>
             <li class='nav-item'>
-                <a href='/{{.Publication.URL}}/about' class='nav-link'>
-                    About
-                </a>
+                <a href='/{{.Publication.URL}}/about' class='nav-link active'>About</a>
             </li>
             {{if .AuthenticatedUser}}
                 {{if eq .AuthenticatedUser.ID .Publication.OwnerID}}
                     <li class='nav-item'>
-                        <a href='/{{.Publication.URL}}/settings' class='nav-link active'>
-                            Settings
-                        </a>
+                        <a href='/{{.Publication.URL}}/settings' class='nav-link'>Settings</a>
                     </li>
                 {{end}}
             {{end}}

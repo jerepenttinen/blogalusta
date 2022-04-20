@@ -3,15 +3,56 @@
 {{define "title"}}User settings{{end}}
 
 {{define "body"}}
-    <p>Settings</p>
-    {{.AuthenticatedUser.Name}}
-    {{.AuthenticatedUser.Email}}
-    <img class='rounded-circle' src='{{userPic .AuthenticatedUser}}' alt='Profile pic' width='128'>
+    {{$user := .AuthenticatedUser}}
+    <b class='mb-3'>Settings</b>
 
-    <form action='/user/image' method='post' enctype='multipart/form-data'>
+    <div class='container mb-3'>
+        <div class='row align-middle align-text-top justify-content-between'>
+            <div class='col'>
+                <div class='text-truncate'>
+                    <h3>{{$user.Name}}</h3>
+                </div>
+                <p class='text-truncate text-muted'>{{$user.Email}}</p>
+            </div>
+            <div class='col col-auto'>
+                <img class='rounded-circle' src='{{userPic $user}}' alt='Profile pic' width='128'>
+            </div>
+        </div>
+    </div>
+
+    <form action='/user/settings/name' method='post'>
         {{template "csrf" $}}
-        <label for='image-input'>Profile picture</label>
-        <input type='file' accept='image/png, image/jpeg' class='form-control mb-3' name='image' id='image-input'>
-        <button type='submit' class='btn btn-primary'>Upload</button>
+        <label class='form-label' for='name-input'>Name</label><br>
+        <div class='d-inline-flex flex-row w-100'>
+            <input class='form-control me-1' type='text' name='name' id='name-input' value='{{$user.Name}}'>
+            <button type='submit' class='btn btn-primary'>Update</button>
+        </div>
+    </form>
+
+    <br>
+
+    <form action='/user/settings/picture' method='post' enctype='multipart/form-data'>
+        {{template "csrf" $}}
+        <label for='image-input'>Profile picture</label><br>
+        <div class='d-inline-flex flex-row w-100'>
+            <input type='file' accept='image/png, image/jpeg' class='form-control me-1' name='image' id='image-input'>
+            <button type='submit' class='btn btn-primary'>Upload</button>
+        </div>
+    </form>
+
+    <br>
+
+    <form action='/user/settings/password' method='post'>
+        {{template "csrf" $}}
+        <label class='form-label' for='old-password-input'>Current password</label><br>
+        <input class='form-control' type='password' name='old-password' id='old-password-input'>
+
+        <label class='form-label' for='new-password-0-input'>New password</label><br>
+        <input class='form-control' type='password' name='new-password-0' id='new-password-0-input'>
+
+        <label class='form-label' for='new-password-1-input'>New password again</label><br>
+        <input class='form-control' type='password' name='new-password-1' id='new-password-1-input'>
+
+        <button type='submit' class='btn btn-primary mt-2'>Change</button>
     </form>
 {{end}}

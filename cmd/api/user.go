@@ -38,9 +38,9 @@ func (app *application) handleSignup(w http.ResponseWriter, r *http.Request) {
 
 	if !form.Valid() {
 		if form.Errors.Has("email") {
-			app.session.Put(r, "flash", form.Errors.Get("email"))
+			app.session.Put(r, "flash_error", form.Errors.Get("email"))
 		} else if form.Errors.Has("password") {
-			app.session.Put(r, "flash", form.Errors.Get("password"))
+			app.session.Put(r, "flash_error", form.Errors.Get("password"))
 		}
 		app.render(w, r, "signup.page.gohtml", &templateData{Form: form})
 		return
@@ -50,7 +50,7 @@ func (app *application) handleSignup(w http.ResponseWriter, r *http.Request) {
 
 	err = app.models.Users.Insert(form.Get("name"), email.Address, form.Get("password"))
 	if err == data.ErrDuplicateRecord {
-		app.session.Put(r, "flash", "Email address already in use")
+		app.session.Put(r, "flash_error", "Email address already in use")
 		app.render(w, r, "signup.page.gohtml", &templateData{Form: form})
 		return
 	} else if err != nil {
@@ -82,7 +82,7 @@ func (app *application) handleLogin(w http.ResponseWriter, r *http.Request) {
 		app.errorLog.Print(err)
 	}
 	if err == data.ErrInvalidCredentials {
-		app.session.Put(r, "flash", "Email or Password is incorrect")
+		app.session.Put(r, "flash_error", "Email or Password is incorrect")
 		app.render(w, r, "login.page.gohtml", &templateData{Form: form})
 		return
 	} else if err != nil {
@@ -120,7 +120,7 @@ func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.R
 	form.RestrictedValues("name", "user")
 
 	if !form.Valid() {
-		app.session.Put(r, "flash", form.Errors.Get("name"))
+		app.session.Put(r, "flash_error", form.Errors.Get("name"))
 		app.render(w, r, "create_publication.page.gohtml", &templateData{Form: form})
 		return
 	}
@@ -128,7 +128,7 @@ func (app *application) handleCreatePublication(w http.ResponseWriter, r *http.R
 	user := app.authenticatedUser(r)
 	url, err := app.models.Publications.Insert(user.ID, form.Get("name"), form.Get("description"))
 	if err == data.ErrDuplicateRecord {
-		app.session.Put(r, "flash", "Publication name already in use")
+		app.session.Put(r, "flash_error", "Publication name already in use")
 		app.render(w, r, "create_publication.page.gohtml", &templateData{Form: form})
 		return
 	} else if err != nil {
@@ -284,11 +284,11 @@ func (app *application) handleAcceptInvitation(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		switch err {
 		case data.ErrRecordNotFound:
-			app.session.Put(r, "flash", "Invalid invitation")
+			app.session.Put(r, "flash_error", "Invalid invitation")
 			http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
 			return
 		case data.ErrDuplicateRecord:
-			app.session.Put(r, "flash", "You're already writer in that publication")
+			app.session.Put(r, "flash_error", "You're already writer in that publication")
 			http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
 			return
 		}
@@ -312,7 +312,7 @@ func (app *application) handleDeclineInvitation(w http.ResponseWriter, r *http.R
 	if err != nil {
 		switch err {
 		case data.ErrRecordNotFound:
-			app.session.Put(r, "flash", "Invalid invitation")
+			app.session.Put(r, "flash_error", "Invalid invitation")
 			http.Redirect(w, r, "/user/invitations", http.StatusSeeOther)
 			return
 		}
@@ -336,7 +336,7 @@ func (app *application) handleLeavePublication(w http.ResponseWriter, r *http.Re
 	if err != nil {
 		switch err {
 		case data.ErrRecordNotFound:
-			app.session.Put(r, "flash", "Invalid publication")
+			app.session.Put(r, "flash_error", "Invalid publication")
 			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
@@ -347,4 +347,81 @@ func (app *application) handleLeavePublication(w http.ResponseWriter, r *http.Re
 
 	app.session.Put(r, "flash", "Left the publication")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) handleChangeUserName(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+	form.Required("name")
+
+	if !form.Valid() {
+		app.session.Put(r, "flash_error", form.Errors.Get("name"))
+		http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
+		return
+	}
+
+	err = app.models.Users.ChangeName(app.authenticatedUser(r), form.Get("name"))
+	if err == data.ErrEditConflict {
+		app.session.Put(r, "flash_error", "Edit conflict, please try again")
+		http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.session.Put(r, "flash", fmt.Sprintf("Changed name to %s", form.Get("name")))
+	http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
+}
+
+func (app *application) handleChangeUserPassword(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, http.StatusBadRequest)
+		return
+	}
+
+	form := forms.New(r.PostForm)
+
+	fields := []string{"old-password", "new-password-0", "new-password-1"}
+	form.Required(fields...)
+	for _, field := range fields {
+		form.MinLength(field, 10)
+		form.MaxLength(field, 72)
+	}
+
+	form.EqualFields("new-password-0", "new-password-1")
+
+	if !form.Valid() {
+		if form.Errors.Has("old-password") {
+			app.session.Put(r, "flash_error", form.Errors.Get("old-password"))
+		} else {
+			app.session.Put(r, "flash_error", form.Errors.Get("new-password-0"))
+		}
+		http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
+		return
+	}
+
+	err = app.models.Users.ChangePassword(app.authenticatedUser(r), form.Get("old-password"), form.Get("new-password-0"))
+	if err == data.ErrEditConflict {
+		app.session.Put(r, "flash_error", "Edit conflict, please try again")
+		http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
+		return
+	} else if err == data.ErrInvalidCredentials {
+		app.session.Put(r, "flash_error", "Wrong password")
+		http.Redirect(w, r, "/user/settings", http.StatusSeeOther)
+		return
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.session.Put(r, "flash", "Changed password, please log back in.")
+	app.session.Pop(r, "userID")
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
 }

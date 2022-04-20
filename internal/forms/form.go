@@ -96,6 +96,12 @@ func (f *Form) ValidEmail(field string) {
 	}
 }
 
+func (f *Form) EqualFields(field1, field2 string) {
+	if f.Get(field1) != f.Get(field2) {
+		f.Errors.Add(field1, fmt.Sprintf("Fields %s and %s not equal", field1, field2))
+	}
+}
+
 func (f *Form) Valid() bool {
 	return len(f.Errors) == 0
 }

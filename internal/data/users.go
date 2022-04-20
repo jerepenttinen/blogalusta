@@ -84,12 +84,12 @@ func (m *UserModel) Authenticate(email, password string) (int, error) {
 func (m *UserModel) Get(id int) (*User, error) {
 	s := &User{}
 
-	stmt := `SELECT id, name, email, created_at, image_id FROM users WHERE id = $1`
+	stmt := `SELECT id, name, email, created_at, image_id, version FROM users WHERE id = $1`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	err := m.DB.QueryRowContext(ctx, stmt, id).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt, &s.ImageID)
+	err := m.DB.QueryRowContext(ctx, stmt, id).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt, &s.ImageID, &s.Version)
 
 	if err == sql.ErrNoRows {
 		return nil, ErrRecordNotFound
@@ -134,13 +134,13 @@ func (m *UserModel) GetWritersOfPublication(publication *Publication) ([]*User, 
 func (m *UserModel) ChangeProfilePicture(user *User, id int) error {
 	query := `
 		UPDATE users
-		SET image_id = $1
-		WHERE id = $2`
+		SET image_id = $1, version = version + 1
+		WHERE id = $2 AND version = $3`
 
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	_, err := m.DB.ExecContext(ctx, query, id, user.ID)
+	_, err := m.DB.ExecContext(ctx, query, id, user.ID, user.Version)
 	if err != nil {
 		return err
 	}
@@ -396,6 +396,70 @@ func (m *UserModel) UnlikeComment(user *User, comment *Comment) error {
 	_, err := m.DB.ExecContext(ctx, query, user.ID, comment.ID)
 	if err == sql.ErrNoRows {
 		return ErrRecordNotFound
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserModel) ChangeName(user *User, name string) error {
+	query := `
+		UPDATE users
+		SET name = $1, version = version + 1
+		WHERE id = $2 AND version = $3`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	_, err := m.DB.ExecContext(ctx, query, name, user.ID, user.Version)
+	if err == sql.ErrNoRows {
+		return ErrEditConflict
+	} else if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (m *UserModel) ChangePassword(user *User, oldPass, newPass string) error {
+	var hashedPassword []byte
+
+	query := `
+		SELECT password_hash
+		FROM users
+		WHERE id = $1 AND version = $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := m.DB.QueryRowContext(ctx, query, user.ID, user.Version).Scan(&hashedPassword)
+	if err == sql.ErrNoRows {
+		return ErrEditConflict
+	} else if err != nil {
+		return err
+	}
+
+	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(oldPass))
+	if err == bcrypt.ErrMismatchedHashAndPassword {
+		return ErrInvalidCredentials
+	} else if err != nil {
+		return err
+	}
+
+	hashedPassword, err = bcrypt.GenerateFromPassword([]byte(newPass), 12)
+	if err != nil {
+		return err
+	}
+
+	query = `
+		UPDATE users
+		SET password_hash = $1, version = version + 1
+		WHERE id = $2 AND version = $3`
+
+	_, err = m.DB.ExecContext(ctx, query, hashedPassword, user.ID, user.Version)
+	if err == sql.ErrNoRows {
+		return ErrEditConflict
 	} else if err != nil {
 		return err
 	}

@@ -98,12 +98,18 @@
             </div>
         </nav>
     </header>
-    {{with .Flash}}
+    {{with .FlashError}}
         <div class='text-center alert alert-danger'>
             {{.}}
         </div>
     {{else}}
-        <hr class='mt-0'>
+        {{with .Flash}}
+            <div class='text-center alert alert-success'>
+                {{.}}
+            </div>
+        {{else}}
+            <hr class='mt-0'>
+        {{end}}
     {{end}}
     <section class='container-md'>
         {{template "body" .}}
