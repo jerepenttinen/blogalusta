@@ -28,7 +28,7 @@
                             <img class='rounded-circle' src='{{userPic $writer}}' alt='Profile pic'
                                  width='44'>
                         </div>
-                        <div class='col my-auto px-0 me-1 text-truncate' style='max-width: 48ch'>
+                        <div class='col my-auto px-0 me-2 text-truncate' style='max-width: 48ch'>
                             <a href='{{userURL $writer}}' class='stretched-link'>{{$writer.Name}}</a>
                         </div>
                         <div class='col col-auto px-0 d-inline-flex my-auto'>
@@ -113,27 +113,6 @@
                             <p class='fs-6'>{{formatNum $like.Count}}</p>
                         </form>
                     </div>
-{{/*                    <div class='col'>*/}}
-{{/*                        <div class='row align-items-center position-relative mb-2'>*/}}
-{{/*                            <div class='col-1 pe-0'>*/}}
-{{/*                                <img class='rounded-circle' src='{{userPic $commenter}}'*/}}
-{{/*                                     alt='Profile pic' width='32'>*/}}
-{{/*                            </div>*/}}
-{{/*                            <div class='col px-0'>*/}}
-{{/*                                <a href='{{userURL $commenter}}'*/}}
-{{/*                                   class='stretched-link px-0'>*/}}
-{{/*                                    <b class='text-body'>{{$commenter.Name}}</b>*/}}
-{{/*                                </a>*/}}
-{{/*                                <div title='{{rfc3339 $comment.CreatedAt}}' class='position-relative d-inline-block'>*/}}
-{{/*                                    <time datetime='{{rfc3339 $comment.CreatedAt}}'*/}}
-{{/*                                          class='stretched-link fs-6'>{{humanDate $comment.CreatedAt}}</time>*/}}
-{{/*                                </div>*/}}
-{{/*                            </div>*/}}
-{{/*                        </div>*/}}
-{{/*                        <div class='text-break text-wrap'>*/}}
-{{/*                            <p>{{$comment.Content}}</p>*/}}
-{{/*                        </div>*/}}
-{{/*                    </div>*/}}
                     <div class='col container mb-3'>
                         <div class='row mx-0 justify-content-between'>
                             <div class='col col-auto px-0 me-2 card-text position-relative d-inline-block' title='{{$commenter.Name}}'>
