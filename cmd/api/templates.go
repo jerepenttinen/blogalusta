@@ -21,6 +21,7 @@ type templateData struct {
 
 	AuthenticatedUser   *data.User
 	HasPublications     bool
+	HasInvitations      bool
 	ProfileUser         *data.User
 	ProfilePublications *data.Profile
 	Publications        []*data.Publication

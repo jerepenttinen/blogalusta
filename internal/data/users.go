@@ -529,3 +529,24 @@ func (m *UserModel) HasPublication(user *User) (bool, error) {
 
 	return exists == 1, nil
 }
+
+func (m *UserModel) HasInvitations(user *User) (bool, error) {
+	query := `
+		SELECT 1
+		FROM invitation
+		WHERE user_id = $1
+		LIMIT 1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	exists := 0
+	err := m.DB.QueryRowContext(ctx, query, user.ID).Scan(&exists)
+	if err == sql.ErrNoRows {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
+}

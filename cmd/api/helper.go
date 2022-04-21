@@ -76,6 +76,7 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	if td.AuthenticatedUser != nil {
 		td.IsSubscribed, _ = app.models.Publications.UserIsSubscribed(td.Publication, td.AuthenticatedUser)
 		td.HasPublications, _ = app.models.Users.HasPublication(td.AuthenticatedUser)
+		td.HasInvitations, _ = app.models.Users.HasInvitations(td.AuthenticatedUser)
 	}
 	return td
 }
