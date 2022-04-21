@@ -58,7 +58,7 @@ func (app *application) handleSignup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.session.Put(r, "flash", "Your signup was successful. Please log in.")
+	app.session.Put(r, "flash", "Your signup was successful")
 	app.session.Put(r, "userID", id)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
@@ -270,7 +270,7 @@ func (app *application) handleShowUserInvitationsPage(w http.ResponseWriter, r *
 	}
 
 	app.render(w, r, "user_invitations.page.gohtml", &templateData{
-		InvitingPublications: invitations,
+		Publications: invitations,
 	})
 }
 
@@ -425,4 +425,47 @@ func (app *application) handleChangeUserPassword(w http.ResponseWriter, r *http.
 	app.session.Put(r, "flash", "Changed password, please log back in.")
 	app.session.Pop(r, "userID")
 	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+}
+
+func (app *application) handleShowPublicationListPage(w http.ResponseWriter, r *http.Request) {
+	page := 1
+	var err error
+	values := r.URL.Query()
+	if values.Has("p") {
+		page, err = strconv.Atoi(values.Get("p"))
+		if err != nil {
+			app.clientError(w, http.StatusNotFound)
+			return
+		}
+		if page < 1 {
+			app.clientError(w, http.StatusNotFound)
+			return
+		}
+	}
+
+	var filters data.Filters
+	filters.Page = page
+	filters.PageSize = 10
+
+	publications, metaData, err := app.models.Publications.Publications(filters)
+	if err == data.ErrRecordNotFound {
+
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	userMap, err := app.models.Users.PublicationOwners(publications)
+	if err == data.ErrRecordNotFound {
+
+	} else if err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.render(w, r, "list_publications.page.gohtml", &templateData{
+		Publications: publications,
+		Metadata:     metaData,
+		UserMap:      userMap,
+	})
 }

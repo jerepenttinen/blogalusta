@@ -34,7 +34,11 @@
                         {{$user := $.AuthenticatedUser}}
                         {{if $user}}
                             {{block "nav" .}}
-                                {{template "newarticleuser" .}}
+                                {{if $.HasPublications}}
+                                    {{template "newarticleuser" .}}
+                                {{else}}
+                                    {{template "newpublication" .}}
+                                {{end}}
                             {{end}}
                             <li class='nav-item dropdown'>
                                 <a href='#' class='dropdown-toggle dropdown-toggle-remove' data-bs-toggle='dropdown'>
@@ -69,6 +73,11 @@
                                     <li>
                                         <a href='/user/invitations' class='dropdown-item py-2'>
                                             <i class='bi-envelope'></i>&nbsp;Invitations
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href='/user/publication/list' class='dropdown-item py-2'>
+                                            <i class='bi-newspaper'></i>&nbsp;Publications
                                         </a>
                                     </li>
                                     <li>

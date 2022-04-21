@@ -14,7 +14,7 @@ var (
 )
 
 type User struct {
-	ID             int64
+	ID             int
 	Name           string
 	Email          string
 	HashedPassword []byte
@@ -310,31 +310,71 @@ func (m *UserModel) Leave(user *User, publicationID int) error {
 	return nil
 }
 
-func (m *UserModel) GetArticleWriters(articles []*Article) (map[int]*User, error) {
-	query := `SELECT id, name, email, created_at, image_id FROM users WHERE id = $1`
-	users := make(map[int]*User)
+func (m *UserModel) ArticleWriters(articles []*Article) (map[int]*User, error) {
+	// query := `SELECT id, name, email, created_at, image_id FROM users WHERE id = $1`
+	// users := make(map[int]*User)
+	//
+	// ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
+	// defer cancel()
+	//
+	// for _, article := range articles {
+	// 	if _, ok := users[int(article.WriterID)]; ok {
+	// 		continue
+	// 	}
+	//
+	// 	s := &User{}
+	// 	err := m.DB.QueryRowContext(ctx, query, article.WriterID).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt, &s.ImageID)
+	//
+	// 	if err == sql.ErrNoRows {
+	// 		return nil, ErrRecordNotFound
+	// 	} else if err != nil {
+	// 		return nil, err
+	// 	}
+	//
+	// 	users[int(s.ID)] = s
+	// }
+	//
+	// return users, nil
 
-	ctx, cancel := context.WithTimeout(context.Background(), 6*time.Second)
-	defer cancel()
+	writers := make(map[int]*User)
 
-	for _, article := range articles {
-		if _, ok := users[int(article.WriterID)]; ok {
+	for i := range articles {
+		id := articles[i].WriterID
+		if _, ok := writers[id]; ok {
 			continue
 		}
 
-		s := &User{}
-		err := m.DB.QueryRowContext(ctx, query, article.WriterID).Scan(&s.ID, &s.Name, &s.Email, &s.CreatedAt, &s.ImageID)
-
+		writer, err := m.Get(id)
 		if err == sql.ErrNoRows {
 			return nil, ErrRecordNotFound
 		} else if err != nil {
 			return nil, err
 		}
 
-		users[int(s.ID)] = s
+		writers[id] = writer
 	}
+	return writers, nil
+}
 
-	return users, nil
+func (m *UserModel) PublicationOwners(p []*Publication) (map[int]*User, error) {
+	owners := make(map[int]*User)
+
+	for i := range p {
+		id := p[i].OwnerID
+		if _, ok := owners[id]; ok {
+			continue
+		}
+
+		owner, err := m.Get(id)
+		if err == sql.ErrNoRows {
+			return nil, ErrRecordNotFound
+		} else if err != nil {
+			return nil, err
+		}
+
+		owners[id] = owner
+	}
+	return owners, nil
 }
 
 func (m *UserModel) LikeArticle(user *User, article *Article) error {
@@ -467,4 +507,25 @@ func (m *UserModel) ChangePassword(user *User, oldPass, newPass string) error {
 	}
 
 	return nil
+}
+
+func (m *UserModel) HasPublication(user *User) (bool, error) {
+	query := `
+		SELECT 1
+		FROM writes_on
+		WHERE user_id = $1
+		LIMIT 1`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	exists := 0
+	err := m.DB.QueryRowContext(ctx, query, user.ID).Scan(&exists)
+	if err == sql.ErrNoRows {
+		return false, nil
+	} else if err != nil {
+		return false, err
+	}
+
+	return exists == 1, nil
 }

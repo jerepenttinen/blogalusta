@@ -3,21 +3,24 @@ package data
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/gosimple/slug"
-	"strconv"
 	"time"
 )
 
 type Article struct {
-	ID            int64
+	ID            int
 	Title         string
 	Content       string
-	PublicationID int64
-	WriterID      int64
-	Writer        *User
-	URL           string
+	PublicationID int
+	WriterID      int
 	CreatedAt     time.Time
 	Version       int
+
+	URL string
+
+	// relations
+	Writer *User
 }
 
 type Like struct {
@@ -26,7 +29,7 @@ type Like struct {
 }
 
 func (a *Article) SetURL() {
-	a.URL = slug.Make(a.Title) + "-" + strconv.FormatInt(a.ID, 10)
+	a.URL = fmt.Sprintf("%s-%d", slug.Make(a.Title), a.ID)
 }
 
 func (a *Article) Matches(url string) bool {
@@ -154,11 +157,55 @@ func (m *ArticleModel) Articles(filters Filters) ([]*Article, Metadata, error) {
 	return articles, metaData, nil
 }
 
+func (m *ArticleModel) SubscribedArticles(filters Filters, user *User) ([]*Article, Metadata, error) {
+	query := `
+		SELECT count(*) OVER(), id, title, content, a.publication_id, writer_id, created_at, version, count(al.article_id) as likes
+		FROM subscribes_to st
+		INNER JOIN article a on st.publication_id = a.publication_id
+		LEFT JOIN article_like al on a.id = al.article_id
+		WHERE st.user_id = $1
+		GROUP BY a.id
+		ORDER BY likes DESC, id DESC
+		LIMIT $2 OFFSET $3`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, user.ID, filters.limit(), filters.offset())
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+	defer rows.Close()
+
+	totalRecords := 0
+	var articles []*Article
+
+	for rows.Next() {
+		a := &Article{}
+		var likes int
+		err = rows.Scan(&totalRecords, &a.ID, &a.Title, &a.Content, &a.PublicationID, &a.WriterID, &a.CreatedAt, &a.Version, &likes)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+		a.SetURL()
+
+		articles = append(articles, a)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metaData := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return articles, metaData, nil
+}
+
 func (m *ArticleModel) LikesMany(articles []*Article, user *User) (map[int]*Like, error) {
 	likes := make(map[int]*Like)
 
 	for _, article := range articles {
-		if _, ok := likes[int(article.ID)]; ok {
+		if _, ok := likes[article.ID]; ok {
 			continue
 		}
 
@@ -167,7 +214,7 @@ func (m *ArticleModel) LikesMany(articles []*Article, user *User) (map[int]*Like
 		if err != nil {
 			return nil, err
 		}
-		likes[int(article.ID)] = like
+		likes[article.ID] = like
 	}
 
 	return likes, nil

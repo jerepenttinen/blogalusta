@@ -68,12 +68,15 @@ func (app *application) addDefaultData(td *templateData, r *http.Request) *templ
 	td.Article = app.article(r)
 	if td.Article != nil {
 		td.HTML = template.HTML(app.markdownToHTML(td.Article.Content))
-		td.Article.Writer, _ = app.models.Users.Get(int(td.Article.WriterID))
+		td.Article.Writer, _ = app.models.Users.Get(td.Article.WriterID)
 	}
 	td.ProfileUser = app.profileUser(r)
 	td.Writers = app.writers(r)
-	td.IsSubscribed, _ = app.models.Publications.UserIsSubscribed(td.Publication, td.AuthenticatedUser)
 	td.InvitedWriters = app.pending(r)
+	if td.AuthenticatedUser != nil {
+		td.IsSubscribed, _ = app.models.Publications.UserIsSubscribed(td.Publication, td.AuthenticatedUser)
+		td.HasPublications, _ = app.models.Users.HasPublication(td.AuthenticatedUser)
+	}
 	return td
 }
 

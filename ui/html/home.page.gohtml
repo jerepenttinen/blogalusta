@@ -4,7 +4,11 @@
 
 {{define "body"}}
     {{with $articles := .Articles}}
-        <h3 class='mt-2'>Top articles past week</h3>
+        {{if $.AuthenticatedUser}}
+            <h3 class='mt-2'>Your top articles past week</h3>
+        {{else}}
+            <h3 class='mt-2'>Top articles past week</h3>
+        {{end}}
         {{range $article := $articles}}
             {{$publication := (index $.PubMap $article.PublicationID)}}
             {{$writer := (index $.UserMap $article.WriterID)}}
@@ -82,6 +86,10 @@
             {{template "pager" $.Metadata}}
         {{end}}
     {{else}}
-        <h1>Coming soon</h1>
+        {{if $.AuthenticatedUser}}
+            <a href='/user/publication/list'>Find some publications to subscribe to</a>
+        {{else}}
+            <h1>Coming soon</h1>
+        {{end}}
     {{end}}
 {{end}}

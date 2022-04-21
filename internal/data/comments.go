@@ -11,12 +11,12 @@ type CommentModel struct {
 }
 
 type Comment struct {
-	ID          int64
+	ID          int
 	CreatedAt   time.Time
-	CommenterID int64
-	ArticleID   int64
+	CommenterID int
+	ArticleID   int
 	Content     string
-	Version     int64
+	Version     int
 }
 
 func (m *CommentModel) Get(commentID int) (*Comment, error) {
@@ -115,7 +115,7 @@ func (m *CommentModel) Commenters(comments []*Comment, userMap map[int]*User) (m
 	defer cancel()
 
 	for _, comment := range comments {
-		if _, ok := userMap[int(comment.CommenterID)]; ok {
+		if _, ok := userMap[comment.CommenterID]; ok {
 			continue
 		}
 
@@ -128,7 +128,7 @@ func (m *CommentModel) Commenters(comments []*Comment, userMap map[int]*User) (m
 			return nil, err
 		}
 
-		userMap[int(s.ID)] = s
+		userMap[s.ID] = s
 	}
 
 	return userMap, nil
@@ -138,7 +138,7 @@ func (m *CommentModel) LikesMany(comments []*Comment, user *User) (map[int]*Like
 	likes := make(map[int]*Like)
 
 	for _, comment := range comments {
-		if _, ok := likes[int(comment.ID)]; ok {
+		if _, ok := likes[comment.ID]; ok {
 			continue
 		}
 
@@ -147,7 +147,7 @@ func (m *CommentModel) LikesMany(comments []*Comment, user *User) (map[int]*Like
 		if err != nil {
 			return nil, err
 		}
-		likes[int(comment.ID)] = like
+		likes[comment.ID] = like
 	}
 
 	return likes, nil
@@ -209,7 +209,7 @@ func (m *CommentModel) Counts(articles []*Article) (map[int]int, error) {
 	counts := make(map[int]int)
 
 	for _, article := range articles {
-		if _, ok := counts[int(article.ID)]; ok {
+		if _, ok := counts[article.ID]; ok {
 			continue
 		}
 
@@ -218,7 +218,7 @@ func (m *CommentModel) Counts(articles []*Article) (map[int]int, error) {
 		if err != nil {
 			return nil, err
 		}
-		counts[int(article.ID)] = count
+		counts[article.ID] = count
 	}
 
 	return counts, nil

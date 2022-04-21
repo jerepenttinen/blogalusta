@@ -18,7 +18,7 @@ func (app *application) handleShowPublicationPage(w http.ResponseWriter, r *http
 		return
 	}
 
-	td.UserMap, err = app.models.Users.GetArticleWriters(td.Articles)
+	td.UserMap, err = app.models.Users.ArticleWriters(td.Articles)
 	if err != nil {
 		app.serverError(w, err)
 		return

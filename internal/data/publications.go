@@ -9,13 +9,16 @@ import (
 )
 
 type Publication struct {
-	ID          int64
+	ID          int
 	Name        string
 	URL         string
 	Description string
-	OwnerID     int64
+	OwnerID     int
 	CreatedAt   time.Time
 	Version     int
+
+	// relations
+	Subscribers int
 }
 
 func (p *Publication) GetBaseURL() string {
@@ -65,7 +68,7 @@ func (m *PublicationModel) GetBySlug(slug string) (*Publication, error) {
 	return p, nil
 }
 
-func (m *PublicationModel) GetUsersPublications(userID int64) (*Profile, error) {
+func (m *PublicationModel) GetUsersPublications(userID int) (*Profile, error) {
 	ps := &Profile{}
 
 	qt := []struct {
@@ -153,7 +156,7 @@ func (m *PublicationModel) Delete(publication *Publication) error {
 	return nil
 }
 
-func (m *PublicationModel) Insert(userID int64, name, description string) (string, error) {
+func (m *PublicationModel) Insert(userID int, name, description string) (string, error) {
 	query := `
 		INSERT INTO publication (name, url, description, owner_id)
 		VALUES ($1, $2, $3, $4)`
@@ -312,7 +315,7 @@ func (m *PublicationModel) Kick(publication *Publication, userID int) error {
 	return nil
 }
 
-func (m *PublicationModel) GetArticlePublications(articles []*Article) (map[int]*Publication, error) {
+func (m *PublicationModel) ArticlePublications(articles []*Article) (map[int]*Publication, error) {
 	query := `
 		SELECT id, name, url, description, owner_id, created_at, version
 		FROM publication
@@ -324,7 +327,7 @@ func (m *PublicationModel) GetArticlePublications(articles []*Article) (map[int]
 	defer cancel()
 
 	for _, article := range articles {
-		if _, ok := pubs[int(article.PublicationID)]; ok {
+		if _, ok := pubs[article.PublicationID]; ok {
 			continue
 		}
 		row := m.DB.QueryRowContext(ctx, query, article.PublicationID)
@@ -338,8 +341,46 @@ func (m *PublicationModel) GetArticlePublications(articles []*Article) (map[int]
 			return nil, err
 		}
 
-		pubs[int(p.ID)] = p
+		pubs[p.ID] = p
 	}
 
 	return pubs, nil
+}
+
+func (m *PublicationModel) Publications(filters Filters) ([]*Publication, Metadata, error) {
+	query := `
+		SELECT count(*) OVER(), p.id, p.name, p.url, p.description, p.owner_id, p.created_at, p.version, count(st.user_id) as subscribers
+		FROM subscribes_to st
+		RIGHT JOIN publication p on p.id = st.publication_id
+		GROUP BY p.id
+		ORDER BY subscribers DESC, p.id DESC
+		LIMIT $1 OFFSET $2`
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := m.DB.QueryContext(ctx, query, filters.limit(), filters.offset())
+	if err != nil {
+		return nil, Metadata{}, err
+	}
+
+	totalRecords := 0
+	pubs := make([]*Publication, 0, filters.PageSize)
+	for rows.Next() {
+		p := &Publication{}
+		err = rows.Scan(&totalRecords, &p.ID, &p.Name, &p.URL, &p.Description, &p.OwnerID, &p.CreatedAt, &p.Version, &p.Subscribers)
+		if err != nil {
+			return nil, Metadata{}, err
+		}
+
+		pubs = append(pubs, p)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, Metadata{}, err
+	}
+
+	metaData := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+
+	return pubs, metaData, nil
 }

@@ -28,7 +28,16 @@ func (app *application) handleShowHomePage(w http.ResponseWriter, r *http.Reques
 	filters.Page = page
 	filters.PageSize = 10
 
-	articles, metaData, err := app.models.Articles.Articles(filters)
+	user := app.authenticatedUser(r)
+	var articles []*data.Article
+	var metaData data.Metadata
+
+	if user == nil {
+		articles, metaData, err = app.models.Articles.Articles(filters)
+	} else {
+		articles, metaData, err = app.models.Articles.SubscribedArticles(filters, user)
+	}
+
 	if err == data.ErrRecordNotFound {
 		app.clientError(w, http.StatusNotFound)
 		return
@@ -36,18 +45,17 @@ func (app *application) handleShowHomePage(w http.ResponseWriter, r *http.Reques
 		app.serverError(w, err)
 		return
 	}
-	pubs, err := app.models.Publications.GetArticlePublications(articles)
+	pubs, err := app.models.Publications.ArticlePublications(articles)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
-	writers, err := app.models.Users.GetArticleWriters(articles)
+	writers, err := app.models.Users.ArticleWriters(articles)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	user := app.authenticatedUser(r)
 	likeMap, err := app.models.Articles.LikesMany(articles, user)
 	if err != nil {
 		app.serverError(w, err)

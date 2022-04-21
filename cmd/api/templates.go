@@ -19,10 +19,11 @@ type templateData struct {
 	CurrentYear int
 	Form        *forms.Form
 
-	AuthenticatedUser    *data.User
-	ProfileUser          *data.User
-	ProfilePublications  *data.Profile
-	InvitingPublications []*data.Publication
+	AuthenticatedUser   *data.User
+	HasPublications     bool
+	ProfileUser         *data.User
+	ProfilePublications *data.Profile
+	Publications        []*data.Publication
 
 	Publication    *data.Publication
 	Writers        []*data.User

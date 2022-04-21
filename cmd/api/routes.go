@@ -35,6 +35,7 @@ func (app *application) routes() *chi.Mux {
 			r.Get("/publication/create", app.handleShowCreatePublicationPage)
 			r.Post("/publication/create", app.handleCreatePublication)
 			r.Post("/publication/{id:[0-9]+}/leave", app.handleLeavePublication)
+			r.Get("/publication/list", app.handleShowPublicationListPage)
 			r.Get("/article", app.handleShowChoosePublicationPage)
 			r.Get("/invitations", app.handleShowUserInvitationsPage)
 			r.Post("/invitations/{id:[0-9]+}/accept", app.handleAcceptInvitation)

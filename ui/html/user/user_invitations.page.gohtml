@@ -5,19 +5,19 @@
 {{define "body"}}
     <div class='container mb-3'>
         <b class='mb-3'>Pending</b>
-        {{with .InvitingPublications}}
-            {{range .}}
+        {{with .Publications}}
+            {{range $publication := .}}
                 <div class='row mb-3 justify-content-between'>
                     <section class='col card border-0'>
                         <div class='card-body row'>
                             <div class='col my-auto text-truncate'>
-                                <a href='{{.GetBaseURL}}' class='card-title stretched-link'>
-                                    <b class='text-body'>{{.Name}}</b>
+                                <a href='{{$publication.GetBaseURL}}' class='card-title stretched-link'>
+                                    <b class='text-body'>{{$publication.Name}}</b>
                                 </a>
-                                <p class='text-wrap text-truncate' style='display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical'>{{.Description}}</p>
+                                <p class='text-wrap text-truncate' style='display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical'>{{$publication.Description}}</p>
                             </div>
                             <div class='col col-auto my-auto'>
-                                <form class='d-inline-block' action='/user/invitations/{{.ID}}/accept'
+                                <form class='d-inline-block' action='/user/invitations/{{$publication.ID}}/accept'
                                       method='post'>
                                     {{template "csrf" $}}
                                     <div class='position-relative d-inline-block'>
@@ -26,7 +26,7 @@
                                         </button>
                                     </div>
                                 </form>
-                                <form class='d-inline-block' action='/user/invitations/{{.ID}}/decline'
+                                <form class='d-inline-block' action='/user/invitations/{{$publication.ID}}/decline'
                                       method='post'>
                                     {{template "csrf" $}}
                                     <div class='position-relative d-inline-block'>

@@ -1,0 +1,38 @@
+{{template "base" .}}
+
+{{define "title"}}Publications{{end}}
+
+{{define "body"}}
+    {{$publications := .Publications}}
+    {{if $publications}}
+        <table class='table'>
+            <thead>
+            <tr class='text-center'>
+                <th scope='col' title='Subscribers'>Subs</th>
+                <th scope='col' title='Name'>Name</th>
+                <th scope='col' title='Owner'>Owner</th>
+                <th scope='col' title='Founded'>Founded</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{range $publication := $publications}}
+                {{$owner := (index $.UserMap $publication.OwnerID)}}
+                <tr class='text-center'>
+                    <th scope='row'>{{$publication.Subscribers}}</th>
+                    <td title='{{$publication.Name}}'>
+                        <a href='{{$publication.GetBaseURL}}'>{{$publication.Name}}</a>
+                    </td>
+                    <td title='{{$owner.Name}}'>
+                        <a href='{{userURL $owner}}'>{{$owner.Name}}</a>
+                    </td>
+                    <td title='{{rfc3339 $publication.CreatedAt}}'>
+                        <time style='display: block; cursor: pointer'>{{humanDate $publication.CreatedAt}}</time>
+                    </td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+    {{else}}
+        <p>No publications found...</p>
+    {{end}}
+{{end}}
