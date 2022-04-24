@@ -92,11 +92,6 @@ func (app *application) routes() *chi.Mux {
 					r.Post("/like", app.handleLikeComment)
 					r.Post("/unlike", app.handleUnlikeComment)
 				})
-
-				// r.Route("/", func(r chi.Router) {
-				// 	r.Use(app.requireUserIsOwner)
-				// 	r.Post("/delete", app.handleDeleteArticle)
-				// })
 			})
 		})
 	})
